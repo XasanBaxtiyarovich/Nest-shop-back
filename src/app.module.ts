@@ -4,6 +4,9 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 
+import { Discount } from './discount/entities';
+import { DiscountModule } from './discount/discount.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot(
@@ -26,9 +29,11 @@ import { ServeStaticModule } from '@nestjs/serve-static';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [],
+      entities: [ Discount ],
       synchronize: true,
     }),
+
+    DiscountModule,
   ],
   controllers: [],
   providers: [],
