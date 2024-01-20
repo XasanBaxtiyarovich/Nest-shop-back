@@ -7,6 +7,9 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { Discount } from './discount/entities';
 import { DiscountModule } from './discount/discount.module';
 
+import {Category} from "./category/entities";
+import {CategoryModule} from "./category/category.module";
+
 @Module({
   imports: [
     ConfigModule.forRoot(
@@ -29,11 +32,12 @@ import { DiscountModule } from './discount/discount.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Discount ],
+      entities: [ Discount, Category ],
       synchronize: true,
     }),
 
     DiscountModule,
+    CategoryModule,
   ],
   controllers: [],
   providers: [],
