@@ -11,8 +11,8 @@ import {CategoryModule} from "./category/category.module";
 import { ProductModule } from './product/product.module';
 import { DiscountModule } from './discount/discount.module';
 
-import {Category} from "./category/entities";
-import {CategoryModule} from "./category/category.module";
+import { PromocodeModule } from './promocode/promocode.module';
+import { Promocode } from './promocode/entities';
 
 @Module({
   imports: [
@@ -32,12 +32,14 @@ import {CategoryModule} from "./category/category.module";
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Discount, Category ],
+      entities: [Discount, Category, Product, Promocode],
       synchronize: true,
     }),
 
     DiscountModule,
     CategoryModule,
+    ProductModule,
+    PromocodeModule,
   ],
   controllers: [],
   providers: [],
