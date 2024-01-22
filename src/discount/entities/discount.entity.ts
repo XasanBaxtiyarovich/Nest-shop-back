@@ -5,7 +5,7 @@ import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 export class Discount {
   @ApiProperty({example: 1, description: 'Unique ID'})
   @PrimaryGeneratedColumn('increment')
-  discount_id: number;
+  id: number;
 
   @ApiProperty({ example: 'name', description: 'Discount name'})
   @Column({type: 'text'})

@@ -4,11 +4,12 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 
-import { Discount } from './discount/entities';
-import { DiscountModule } from './discount/discount.module';
-
 import {Category} from "./category/entities";
+import { Product } from './product/entities';
+import { Discount } from './discount/entities';
 import {CategoryModule} from "./category/category.module";
+import { ProductModule } from './product/product.module';
+import { DiscountModule } from './discount/discount.module';
 
 @Module({
   imports: [
@@ -32,12 +33,13 @@ import {CategoryModule} from "./category/category.module";
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Discount, Category ],
+      entities: [ Discount, Category, Product ],
       synchronize: true,
     }),
 
     DiscountModule,
     CategoryModule,
+    ProductModule,
   ],
   controllers: [],
   providers: [],

@@ -45,7 +45,7 @@ export class CategoryService {
   }
 
   async findOneCategory(id: number): Promise<Object> {
-    const category = await this.categoryRepository.findOne({ where: { category_id: id } });
+    const category = await this.categoryRepository.findOne({ where: { id } });
 
     if (!category) {
       return {
@@ -61,7 +61,7 @@ export class CategoryService {
   }
 
   async updateCategory(id: number, updateCategoryDto: UpdateCategoryDto): Promise<Object> {
-    const category = await this.categoryRepository.findOne({ where: { category_id: id } });
+    const category = await this.categoryRepository.findOne({ where: { id } });
 
     if (!category) {
       return {
@@ -83,7 +83,7 @@ export class CategoryService {
 
     await this.categoryRepository.update(id, { ...updateCategoryDto });
 
-    const updatedCategory = await this.categoryRepository.findOne({ where: { category_id: id } });
+    const updatedCategory = await this.categoryRepository.findOne({ where: { id } });
 
     return {
       category: updatedCategory,
@@ -92,7 +92,7 @@ export class CategoryService {
   }
 
   async removeCategory(id: number): Promise<Object | Number> {
-    const category = await this.categoryRepository.findOne({ where: { category_id: id } });
+    const category = await this.categoryRepository.findOne({ where: { id } });
 
     if (!category) {
       return {
@@ -101,7 +101,7 @@ export class CategoryService {
       };
     }
 
-    await this.categoryRepository.delete({ category_id: id });
+    await this.categoryRepository.delete({ id });
 
     return HttpStatus.OK;
   }

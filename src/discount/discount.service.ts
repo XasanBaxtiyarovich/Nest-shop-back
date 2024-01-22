@@ -43,7 +43,7 @@ export class DiscountService {
   }
 
   async findOneDiscount(id: number): Promise<Object> {
-    const [ discount ] = await this.discountRepository.findBy({ discount_id: id });
+    const [ discount ] = await this.discountRepository.findBy({ id });
     if (!discount) {
       return {
         message: 'Discount not found',
@@ -58,7 +58,7 @@ export class DiscountService {
   }
 
   async updateDiscount(id: number, updateDiscountDto: UpdateDiscountDto) {
-    const [ discount ] = await this.discountRepository.findBy({ discount_id: id });
+    const [ discount ] = await this.discountRepository.findBy({ id });
     if (!discount) {
       return {
         message: 'Discount not found',
@@ -76,9 +76,9 @@ export class DiscountService {
       }
     }
     
-    await this.discountRepository.update({ discount_id: id }, { ...updateDiscountDto });
+    await this.discountRepository.update({ id }, { ...updateDiscountDto });
 
-    const updated_discount = await this.discountRepository.findBy({ discount_id: id });
+    const updated_discount = await this.discountRepository.findBy({ id });
 
     return {
       discount: updated_discount,
@@ -87,7 +87,7 @@ export class DiscountService {
   }
 
   async removeDiscount(id: number): Promise<Object | Number> {
-    const [ discount ] = await this.discountRepository.findBy({ discount_id: id });
+    const [ discount ] = await this.discountRepository.findBy({ id });
     if (!discount) {
       return {
         message: 'Discount not found',
@@ -95,7 +95,7 @@ export class DiscountService {
       };
     }
 
-    await this.discountRepository.delete({ discount_id: id });
+    await this.discountRepository.delete({ id });
 
     return HttpStatus.OK;
   }
