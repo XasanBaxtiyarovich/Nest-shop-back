@@ -7,23 +7,21 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { Discount } from './discount/entities';
 import { DiscountModule } from './discount/discount.module';
 
-import {Category} from "./category/entities";
-import {CategoryModule} from "./category/category.module";
+import { Category } from './category/entities';
+import { CategoryModule } from './category/category.module';
+import { PromocodeModule } from './promocode/promocode.module';
+import { Promocode } from './promocode/entities';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(
-      {
-        envFilePath: '.env',
-        isGlobal: true
-      }
-    ),
-    
-    ServeStaticModule.forRoot(
-      {
-        rootPath: resolve(__dirname, 'static')
-      }
-    ),
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+    }),
+
+    ServeStaticModule.forRoot({
+      rootPath: resolve(__dirname, 'static'),
+    }),
 
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -32,12 +30,13 @@ import {CategoryModule} from "./category/category.module";
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Discount, Category ],
+      entities: [Discount, Category, Promocode],
       synchronize: true,
     }),
 
     DiscountModule,
     CategoryModule,
+    PromocodeModule,
   ],
   controllers: [],
   providers: [],
