@@ -3,13 +3,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { HttpStatus, Injectable } from '@nestjs/common';
 
 import { Category } from './entities';
+import { FilesService } from '../files/files.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto';
 
 @Injectable()
 export class CategoryService {
-  constructor(@InjectRepository(Category) private categoryRepository: Repository<Category>) {}
+  constructor(
+    @InjectRepository(Category) private categoryRepository: Repository<Category>,
+    private fileService: FilesService  
+  ) {}
 
-  async createCategory(createCategoryDto: CreateCategoryDto): Promise<Object> {
+  async createCategory(createCategoryDto: CreateCategoryDto, image: any): Promise<Object> {
     const existingCategory = await this.categoryRepository.findOne({ where: { name: createCategoryDto.name } });
 
     if (existingCategory) {
@@ -19,7 +23,9 @@ export class CategoryService {
       };
     }
 
-    const newCategory = await this.categoryRepository.save({ ...createCategoryDto });
+    const photo = await this.fileService.createFile(image);
+
+    const newCategory = await this.categoryRepository.save({ ...createCategoryDto, photo });
 
     return {
       category: newCategory,
@@ -60,7 +66,7 @@ export class CategoryService {
     };
   }
 
-  async updateCategory(id: number, updateCategoryDto: UpdateCategoryDto): Promise<Object> {
+  async updateCategory(id: number, updateCategoryDto: UpdateCategoryDto, image: any): Promise<Object> {
     const category = await this.categoryRepository.findOne({ where: { id } });
 
     if (!category) {
@@ -81,7 +87,9 @@ export class CategoryService {
       }
     }
 
-    await this.categoryRepository.update(id, { ...updateCategoryDto });
+    const photo = await this.fileService.createFile(image);
+
+    await this.categoryRepository.update(id, { ...updateCategoryDto, photo });
 
     const updatedCategory = await this.categoryRepository.findOne({ where: { id } });
 

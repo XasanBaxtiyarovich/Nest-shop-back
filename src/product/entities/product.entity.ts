@@ -56,6 +56,7 @@ export class Product {
     @Column({default: true})
     is_active: boolean;   
 
+    @ApiProperty({ example: 1, description: 'Category Primary key id'})
     @ManyToOne(() => Category, (category) => category.products)
     category: Category
 

@@ -4,15 +4,18 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 
-import {Category} from "./category/entities";
+import { Media } from './media/entities';
 import { Product } from './product/entities';
+import { Category } from "./category/entities";
 import { Discount } from './discount/entities';
-import {CategoryModule} from "./category/category.module";
-import { ProductModule } from './product/product.module';
-import { DiscountModule } from './discount/discount.module';
-
-import { PromocodeModule } from './promocode/promocode.module';
 import { Promocode } from './promocode/entities';
+
+import { MediaModule } from './media/media.module';
+import { ProductModule } from './product/product.module';
+import { CategoryModule } from "./category/category.module";
+import { DiscountModule } from './discount/discount.module';
+import { PromocodeModule } from './promocode/promocode.module';
+
 
 @Module({
   imports: [
@@ -32,7 +35,7 @@ import { Promocode } from './promocode/entities';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [Discount, Category, Product, Promocode],
+      entities: [Discount, Category, Product, Promocode, Media],
       synchronize: true,
     }),
 
@@ -40,6 +43,7 @@ import { Promocode } from './promocode/entities';
     CategoryModule,
     ProductModule,
     PromocodeModule,
+    MediaModule,
   ],
   controllers: [],
   providers: [],
