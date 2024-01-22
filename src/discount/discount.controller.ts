@@ -1,10 +1,11 @@
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
 
 import { Discount } from './entities';
 import { DiscountService } from './discount.service';
 import { CreateDiscountDto, UpdateDiscountDto } from './dto';
 
+@ApiTags('discount')
 @Controller('discount')
 export class DiscountController {
   constructor(private readonly discountService: DiscountService) {}

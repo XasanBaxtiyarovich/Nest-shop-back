@@ -1,11 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
-@Entity({ name: 'Category' })
+@Entity({ name: 'category' })
 export class Category {
   @ApiProperty({ example: '1', description: 'Unikal ID' })
   @PrimaryGeneratedColumn('increment')
-  id: number;
+  category_id: number;
 
   @ApiProperty({ example: 'Fruits', description: 'Category name' })
   @Column({ type: 'varchar', length: 255, nullable: false })
