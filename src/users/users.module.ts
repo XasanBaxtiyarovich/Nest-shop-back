@@ -1,24 +1,27 @@
+import { JwtModule } from "@nestjs/jwt";
 import { Module } from "@nestjs/common";
-import { UsersController } from "./users.controller";
-import { UsersService } from "./users.service";
-import {JwtModule} from "@nestjs/jwt"
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { Users } from "./entities/users.entities";
+
+import { Users } from "./entities";
+import { Otp } from "../otp/entites";
+import { Basket } from "../basket/entities";
 import { OtpModule } from "../otp/otp.module";
 import { SmsModule } from "../sms/sms.module";
-import { Otp } from "../otp/entites/create-otp.dto";
+import { UsersService } from "./users.service";
+import { UsersController } from "./users.controller";
 import { FilesService } from "../files/files.service";
-import { Basket } from "../basket/entities";
+
 
 @Module({
     imports:[
-        TypeOrmModule.forFeature([
-            Users,
-            Basket,
-            Otp
-        ]),
+        TypeOrmModule.forFeature(
+            [
+                Users,
+                Otp,
+                Basket
+            ]
+        ),
         JwtModule.register({}),
-        // MailModule,
         OtpModule,
         SmsModule
     ],

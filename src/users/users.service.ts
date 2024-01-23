@@ -6,7 +6,7 @@ import { JwtService } from "@nestjs/jwt";
 import * as otpGenerator from "otp-generator"
 import { SmsService } from './../sms/sms.service';
 import { InjectRepository } from "@nestjs/typeorm";
-import { BadRequestException, ForbiddenException, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+import { HttpStatus, ServiceUnavailableException } from '@nestjs/common';
 
 import { Users } from "./entities";
 import { Otp } from '../otp/entites';
@@ -24,169 +24,167 @@ export class UsersService {
         private jwtService: JwtService,
     ) {}
 
-    async userRegister(createUserDto:CreateUserDto,res:Response) {
-        const { phone } = createUserDto
+    async user_signup(createUserDto:CreateUserDto): Promise<Object> {
+        const { phone } = createUserDto;
+        const [ user ] =  await this.userRepository.findBy({ phone: createUserDto.phone });
         
-        const [ user ] =  await this.userRepository.findBy({ phone: createUserDto.phone })
-        
-        if(user){
-            throw new BadRequestException("PhoneNumber already exists")
+        if(user) {
+            return {
+                status: HttpStatus.CONFLICT,
+                message: "Phone number already exists"
+            }
         }
 
+        const new_user  = await this.userRepository.save({ ...createUserDto, hashed_refresh_token: null });
 
-        const newUser = await this.userRepository.create({
-            ...createUserDto,
-            is_block:false
-        })
-        
-        const uniquKey:string = v4()
-        const updateUser = await this.userRepository.save(
-            {
-                ...createUserDto,
-                hashed_refresh_token:null,
-            }
-        )
-        const f = await this.newOTP({phoneNumber:phone})
-
-        const updateUserFind = await this.userRepository.findBy({id:newUser.id})
+        await this.newOTP({ phoneNumber: phone });
         
         return {
-            message:"User registeried successfully",
-            user:updateUserFind
+            message:"User signup successfully",
+            user: new_user
         };
     }
 
-    async userLogin(loginDtoUser:PhoneUserDto,res:Response) {
-        const [findUser] = await this.userRepository.find({where:{phone:loginDtoUser.phoneNumber}})
-        if(!findUser){
-            throw new NotFoundException("This Phone Number is not yet registered")
-        }
-        if(findUser.is_block==true){
-            throw new BadRequestException("User is Block User")
+    async user_signin(loginDtoUser:PhoneUserDto): Promise<Object> {
+        const [ user ] = await this.userRepository.findBy({ phone:loginDtoUser.phoneNumber });
+        if(!user) {
+            return {
+                status: HttpStatus.NOT_FOUND,
+                message: 'User not found'
+            }
         }
 
-        const f = await this.newOTP({phoneNumber:loginDtoUser.phoneNumber})
+        if(user.is_block === true) {
+            return {
+                status: HttpStatus.FORBIDDEN,
+                message: 'User is blocked'
+            }
+        }
+
+        await this.newOTP({ phoneNumber: loginDtoUser.phoneNumber });
+
         return {
+            status: HttpStatus.OK,
             message:"You have been sent an login code",
         };
 
     }
 
-    async userOtpLogin(loginDtoUser:LoginDtoUser,res:Response) {
-        const [findUser] = await this.userRepository.find({where:{phone:loginDtoUser.phoneNumber}})
-        if(!findUser){
-            throw new NotFoundException("This Phone Number is not yet registered")
-        }
-        if(findUser.is_block==true){
-            throw new BadRequestException("User is Blocked")
+    async user_otp_created(loginDtoUser: LoginDtoUser, res: Response): Promise<Object> {
+        const [ user ] = await this.userRepository.findBy({ phone: loginDtoUser.phoneNumber });
+        if(!user) {
+            return {
+                status: HttpStatus.NOT_FOUND,
+                message: 'This Phone Number is not yet registered'
+            }
         }
 
-        const [OtpcheckUser] = await this.otpRepository.find({where:{check:loginDtoUser.phoneNumber}})
+        if(user.is_block === true) {
+            return {
+                status: HttpStatus.FORBIDDEN,
+                message: 'User is blocked'
+            }
+        }
+
+        const [ otp_check ] = await this.otpRepository.findBy({ check:loginDtoUser.phoneNumber });
         
-        if(OtpcheckUser.verified==true){
-            throw new BadRequestException("Get another code that this code was previously used for")
+        if(otp_check.verified === true) {
+            return {
+                status: HttpStatus.CONFLICT,
+                message: 'Get another code that this code was previously used for'
+            }
         }
 
-        if(OtpcheckUser.otp!==loginDtoUser.otp){
-            throw new NotFoundException("Otp is error")
+        if(otp_check.otp !== loginDtoUser.otp) {
+            return {
+                status: HttpStatus.CONFLICT,
+                message: 'OTP Error'
+            }
         }
         
-        const tokens = await this.getTokens(findUser)
-
+        const tokens = await this.getTokens(user);
         const hashed_refresh_token = await bcrypt.hash(tokens.refresh_token,7)
 
-        const otpCheckVerified = await this.otpRepository.update({check:loginDtoUser.phoneNumber},{verified:true})
-        const updateUserFind = await this.userRepository.update({id:findUser.id},{hashed_refresh_token:hashed_refresh_token})
-        const findUpdateUser = await this.userRepository.findBy({id:findUser.id})
+        await this.otpRepository.update({ check: loginDtoUser.phoneNumber }, { verified: true });
+        await this.userRepository.update({id: user.id }, { hashed_refresh_token: hashed_refresh_token });
+
+        const logined_user = await this.userRepository.findBy({ id: user.id });
         
         res.cookie('refresh_token',tokens.refresh_token,{
             maxAge:15*24*60*60*1000,
             httpOnly:true,
         })
+
         return {
-            message:"User Login successfully",
-            user:findUpdateUser,
-            token:tokens
+            status: HttpStatus.OK,
+            user: logined_user,
+            token: tokens
         };
-
     }
 
-    async userlogout(refereshToken:string,res:Response){
-        console.log(0);
-        const userData = await this.jwtService.verify(refereshToken,{
-            secret:process.env.REFRESH_TOKEN_KEY_PERSON
-        })
-        console.log(userData);
-        
-        if(!userData){
-            throw new ForbiddenException("User not found")
+    async find_users(): Promise<Object> {
+        const users = await this.userRepository.find()
+        if(users.length === 0){
+            return {
+                status: HttpStatus.NOT_FOUND,
+                message: 'Users not found'
+            }
         }
-        console.log(1);
-        
-        const updateUser = await this.userRepository.update(
-            {id:userData.id},
-            {hashed_refresh_token:null},
-        )
-        console.log(2);
-        res.clearCookie('refresh_token')
-        console.log(3);
+
         return {
-            message:"User logged out successful",
-            user:userData
+            status: HttpStatus.OK,
+            users
         }
     }
 
-    async getallusers() {
-        const findallUser = await this.userRepository.find()
-        if(!findallUser){
-            throw new NotFoundException("Users not found")
+    async find_user(id: number): Promise<Object> {
+        const [ user ] = await this.userRepository.findBy({ id });
+        if(!user){
+            return {
+                status: HttpStatus.NOT_FOUND,
+                message: 'User not found'
+            }
         }
+
         return {
-            message:"Users found successfully",
-            users:findallUser
+            status: HttpStatus.OK,
+            user
         }
     }
 
-    async getoneuser(id:number) {
-        const [findoneUser] = await this.userRepository.find({where:{id:id}})
-        if(!findoneUser){
-            throw new NotFoundException("User not found")
-        }
-        return {
-            message:"Users found successfully",
-            user:findoneUser
-        }
-    }
-
-    async updateuser(id:number, updateUserDto:UpdateUserDto) {
-        const [findoneUser] = await this.userRepository.find({where:{id:id}})
-        if(!findoneUser){
-            throw new NotFoundException("User not found")
+    async update_user(id: number, updateUserDto: UpdateUserDto): Promise<Object> {
+        const [ user ] = await this.userRepository.findBy({ id });
+        if(!user){
+            return {
+                status: HttpStatus.NOT_FOUND,
+                message: 'User not found'
+            }
         }
 
-        const updateUser = await this.userRepository.update({id:id},{...updateUserDto})
-        const [findUpdateuser] = await this.userRepository.find({where:{id:id}})
+        const updated_user = await this.userRepository.update({ id }, { ...updateUserDto });
+
         return {
-            message:"Users updated successfully",
-            user:findUpdateuser
+            status: HttpStatus.OK,
+            updated_user
         }
 
     }
 
-    async deleteuser(id:number){
-        const [findoneUser] = await this.userRepository.find({where:{id:id}})
-        if(!findoneUser){
-            throw new NotFoundException("User not found")
+    async remove_user(id: number): Promise<Object | HttpStatus> {
+        const [ user ] = await this.userRepository.findBy({ id });
+        if(!user){
+            return {
+                status: HttpStatus.NOT_FOUND,
+                message: 'User not found'
+            }
         }
-        const deleteoneUser = await this.userRepository.delete({id:id})
-        return {
-            message:"Users deleted successfully",
-            user:findoneUser
-        }
+
+        await this.userRepository.delete({ id });
+
+        return HttpStatus.OK;
     }
 
     async newOTP(phoneUserDto: PhoneUserDto){
-        
         const phone_number = phoneUserDto.phoneNumber
         const otp = otpGenerator.generate(4,{
             upperCaseAlphabets: false,
@@ -229,13 +227,10 @@ export class UsersService {
         return {status:'Success',Details:encoded,message}
     }
 
-    async getTokens(user:Users){
-        const jwtPayload={
-            id:user.id,
-            is_block:user.is_block,
-        }
-        const [accessToken,refreshToken] = await Promise.all([
-            
+    async getTokens(user: Users){
+        const jwtPayload={ id: user.id, is_block: user.is_block };
+
+        const [accessToken,refreshToken] = await Promise.all([    
             this.jwtService.signAsync(jwtPayload,{
                 secret:process.env.ACCES_TOKEN_KEY_PERSON,
                 expiresIn:process.env.ACCESS_TOKEN_TIME
