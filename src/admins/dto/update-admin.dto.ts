@@ -1,8 +1,5 @@
-
 export class UpdateAdminDto{
+    firstname?: string;
 
-    firstname?:string;
-
-    lastname?:string
-
+    lastname?: string
 }

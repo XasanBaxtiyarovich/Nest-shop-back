@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Res } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-users.dto";
 import { ApiOperation, ApiResponse } from "@nestjs/swagger";
@@ -6,11 +6,8 @@ import { Users } from "./entities/users.entities";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { LoginDtoUser } from "./dto/login.dto";
 import { Response } from "express";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { ActiveUserDto } from "./dto/activate-user.dto";
 import { PhoneUserDto } from "./dto/Otp-create.dto";
 import { Cookiegetter } from "../decorators/cookiegetter";
-import { AdminGuard } from "../guards/admin.guard";
 
 
 
@@ -65,7 +62,6 @@ export class UsersController {
     @ApiOperation({summary:"Find all Users"})
     @ApiResponse({status:200,type:[Users]})
     @Get('findall')
-    @UseGuards(AdminGuard)
     getallusers(){
         return this.usersService.getallusers()
     }
@@ -73,7 +69,6 @@ export class UsersController {
     @ApiOperation({summary:"Find One User"})
     @ApiResponse({status:200,type:Users})
     @Get('findone/:id')
-    @UseGuards(AdminGuard)
     findOne(
         @Param('id') id:string
     ){
@@ -94,7 +89,6 @@ export class UsersController {
     @ApiOperation({summary:"Remove User"})
     @ApiResponse({status:200})
     @Delete('delete/:id')
-    @UseGuards(AdminGuard)
     Deleteuser(
         @Param('id') id:string,
     ){

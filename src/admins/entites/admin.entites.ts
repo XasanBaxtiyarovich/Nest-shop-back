@@ -1,10 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-
 @Entity('admin')
 export class Admin{
-
     @ApiProperty({example:1 ,description:"Unique ID"})
     @PrimaryGeneratedColumn('increment')
     id:number
