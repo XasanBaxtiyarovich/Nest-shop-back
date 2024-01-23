@@ -43,7 +43,7 @@ export class AdminService {
         }  
     }
 
-    async userRegister(createAdminDto:CreateAdminDto,res:Response) {
+    async adminRegister(createAdminDto:CreateAdminDto,res:Response) {
         
         const [admin] =  await this.adminRepository.findBy({username: createAdminDto.username})
         
@@ -75,7 +75,7 @@ export class AdminService {
         };
     }
 
-    async userLogin(loginAdminDto:LoginAdminDto,res:Response) {
+    async adminLogin(loginAdminDto:LoginAdminDto,res:Response) {
         const [findAdmin] = await this.adminRepository.find({where:{username:loginAdminDto.username}})
         if(!findAdmin){
             throw new NotFoundException("This Username does not exist")
@@ -153,7 +153,7 @@ export class AdminService {
 
     }
 
-    async userlogout(refereshToken:string,res:Response){
+    async adminlogout(refereshToken:string,res:Response){
         console.log(0);
         const userData = await this.jwtService.verify(refereshToken,{
             secret:process.env.ADMIN_REFRESH_TOKEN_KEY_PERSON
@@ -178,8 +178,6 @@ export class AdminService {
         }
     }
 
-
-
     async getalladmins() {
         const findallAdmin = await this.adminRepository.find()
         if(!findallAdmin){
@@ -191,7 +189,7 @@ export class AdminService {
         }
     }
 
-    async getoneuser(id:number) {
+    async getoneadmin(id:number) {
         const [findoneAdmin] = await this.adminRepository.find({where:{id:id}})
         if(!findoneAdmin){
             throw new NotFoundException("Admin not found")
@@ -228,5 +226,6 @@ export class AdminService {
             user:findoneAdmin
         }
     }
+
 
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Res, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { Response } from "express";
 import { Cookiegetter } from "../decorators/cookiegetter";
@@ -8,6 +8,7 @@ import { AdminService } from "./admin.service";
 import { LoginAdminDto } from "./dto/login-admin.dto";
 import { UpdateAdminDto } from "./dto/update-admin.dto";
 import { NewPasswordDto } from "./dto/new-password";
+import { AdminGuard } from "../guards/admin.guard";
 
 
 
@@ -18,7 +19,7 @@ export class AdminController {
     ){}
 
 
-    @ApiOperation({summary:"Admin Registration"})
+    @ApiOperation({summary:"Admin update Password"})
     @ApiResponse({status:200,type:Admin})
     @Post('newpassword/:id')
     newpassword(
@@ -32,11 +33,12 @@ export class AdminController {
     @ApiOperation({summary:"Admin Registration"})
     @ApiResponse({status:200,type:Admin})
     @Post('register')
+    @UseGuards(AdminGuard)
     register(
         @Body() createAdminDto:CreateAdminDto,
         @Res({passthrough:true}) res:Response
     ){
-        return this.adminService.userRegister(createAdminDto,res)
+        return this.adminService.adminRegister(createAdminDto,res)
     }
 
     @ApiOperation({summary:"Admin Login"})
@@ -46,22 +48,23 @@ export class AdminController {
         @Body() loginAdminDto:LoginAdminDto,
         @Res({passthrough:true}) res:Response
     ){
-        return this.adminService.userLogin(loginAdminDto,res)
+        return this.adminService.adminLogin(loginAdminDto,res)
     }
 
-    @ApiOperation({summary:"User Logout"})
+    @ApiOperation({summary:"Admin Logout"})
     @ApiResponse({status:200,type:Admin})
     @Post('logout')
     logout(
         @Cookiegetter('refresh_token') refreshToken:string,
         @Res({passthrough:true}) res:Response
     ){
-        return this.adminService.userlogout(refreshToken,res)
+        return this.adminService.adminlogout(refreshToken,res)
     }
 
     @ApiOperation({summary:"Find all Admin"})
     @ApiResponse({status:200,type:[Admin]})
     @Get('findall')
+    @UseGuards(AdminGuard)
     getallAdmin(){
         return this.adminService.getalladmins()
     }
@@ -69,13 +72,14 @@ export class AdminController {
     @ApiOperation({summary:"Find One Admin"})
     @ApiResponse({status:200,type:Admin})
     @Get('findone/:id')
+    @UseGuards(AdminGuard)
     findOne(
         @Param('id') id:string
     ){
-        return this.adminService.getoneuser(+id)
+        return this.adminService.getoneadmin(+id)
     }
 
-    @ApiOperation({summary:"Find One Update User"})
+    @ApiOperation({summary:"Find One Update Admin"})
     @ApiResponse({status:200,type:Admin})
     @Patch('update/:id')
     updateAdmin(
@@ -86,7 +90,7 @@ export class AdminController {
     }
 
 
-    @ApiOperation({summary:"Remove User"})
+    @ApiOperation({summary:"Remove Admin"})
     @ApiResponse({status:200})
     @Delete('delete/:id')
     Deleteuser(

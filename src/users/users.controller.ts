@@ -10,7 +10,7 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { ActiveUserDto } from "./dto/activate-user.dto";
 import { PhoneUserDto } from "./dto/Otp-create.dto";
 import { Cookiegetter } from "../decorators/cookiegetter";
-import { UserGuard } from "../guards/user.guard";
+import { AdminGuard } from "../guards/admin.guard";
 
 
 
@@ -65,6 +65,7 @@ export class UsersController {
     @ApiOperation({summary:"Find all Users"})
     @ApiResponse({status:200,type:[Users]})
     @Get('findall')
+    @UseGuards(AdminGuard)
     getallusers(){
         return this.usersService.getallusers()
     }
@@ -72,6 +73,7 @@ export class UsersController {
     @ApiOperation({summary:"Find One User"})
     @ApiResponse({status:200,type:Users})
     @Get('findone/:id')
+    @UseGuards(AdminGuard)
     findOne(
         @Param('id') id:string
     ){
@@ -92,6 +94,7 @@ export class UsersController {
     @ApiOperation({summary:"Remove User"})
     @ApiResponse({status:200})
     @Delete('delete/:id')
+    @UseGuards(AdminGuard)
     Deleteuser(
         @Param('id') id:string,
     ){
