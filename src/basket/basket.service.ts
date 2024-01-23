@@ -1,21 +1,17 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { CreateBasketDto } from './dto/create-Basket.dto';
-import { UpdateBasketDto } from './dto/update-Basket.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Basket } from './entities';
 import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { HttpStatus, Injectable } from '@nestjs/common';
+
+import { Basket } from './entities';
+import { CreateBasketDto } from './dto';
+
 
 @Injectable()
 export class BasketService {
-  constructor(
-    @InjectRepository(Basket)
-    private basketRepository: Repository<Basket>,
-  ) {}
+  constructor( @InjectRepository(Basket) private basketRepository: Repository<Basket> ) {}
 
-  async create(createBasketDto: CreateBasketDto): Promise<Object> {
-    const existingBasket = await this.basketRepository.findBy({
-      user_id: createBasketDto.id,
-    });
+  async createBasket(createBasketDto: CreateBasketDto): Promise<Object> {
+    const existingBasket = await this.basketRepository.findBy({ user: createBasketDto.user });
 
     if (existingBasket) {
       return {
@@ -35,10 +31,10 @@ export class BasketService {
     };
   }
 
-  async findAll(): Promise<Object> {
-    const Baskets = await this.basketRepository.find();
+  async findAllBasket(): Promise<Object> {
+    const baskets = await this.basketRepository.find();
 
-    if (Baskets.length == 0) {
+    if (baskets.length == 0) {
       return {
         message: 'Baskets not found',
         status: HttpStatus.NOT_FOUND,
@@ -46,12 +42,28 @@ export class BasketService {
     }
 
     return {
-      Baskets,
+      baskets,
       status: HttpStatus.OK,
     };
   }
 
-  async findOne(id: number): Promise<Object> {
+  async findOneBasket(id: number): Promise<Object> {
+    const basket = await this.basketRepository.findBy({ id });
+
+    if (!basket) {
+      return {
+        message: 'Basket not found',
+        status: HttpStatus.NOT_FOUND,
+      };
+    }
+
+    return {
+      basket,
+      status: HttpStatus.OK,
+    };
+  }
+
+  async removeBasket(id: number): Promise<Object | Number> {
     const Basket = await this.basketRepository.findBy({ id });
 
     if (!Basket) {
@@ -61,27 +73,8 @@ export class BasketService {
       };
     }
 
-    return {
-      Basket,
-      status: HttpStatus.OK,
-    };
-  }
+    await this.basketRepository.delete({ id });
 
-  async remove(id: number): Promise<Object> {
-    const Basket = await this.basketRepository.findBy({ id });
-
-    if (!Basket) {
-      return {
-        message: 'Basket not found',
-        status: HttpStatus.NOT_FOUND,
-      };
-    }
-
-    await this.basketRepository.delete({ id: id });
-
-    return {
-      message: 'Delete successfully',
-      status: HttpStatus.OK,
-    };
+    return HttpStatus.OK;
   }
 }

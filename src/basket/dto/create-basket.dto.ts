@@ -6,5 +6,5 @@ import { Users } from '../../users/entities';
 export class CreateBasketDto {
   @ApiProperty({ example: '1', description: 'User ID' })
   @IsNotEmpty()
-  user_id: Users;
+  user: Users;
 }

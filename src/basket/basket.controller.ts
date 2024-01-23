@@ -1,15 +1,9 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+
 import { Basket } from './entities';
+import { CreateBasketDto } from './dto';
 import { BasketService } from './basket.service';
-import { CreateBasketDto } from './dto/create-basket.dto';
 
 @ApiTags('basket')
 @Controller('basket')
@@ -19,28 +13,34 @@ export class BasketController {
   @ApiOperation({ summary: 'Add Basket' })
   @ApiResponse({ status: 200, type: Basket })
   @Post()
-  create(@Body() createDto: CreateBasketDto): Promise<String | Object> {
-    return this.basketService.create(createDto);
+  createBasket(
+    @Body() createDto: CreateBasketDto
+  ): Promise<String | Object> {
+    return this.basketService.createBasket(createDto);
   }
 
   @ApiOperation({ summary: 'Get All Baskets' })
   @ApiResponse({ status: 200, type: [Basket] })
   @Get()
-  findAll(): Promise<Object> {
-    return this.basketService.findAll();
+  findAllBasket(): Promise<Object> {
+    return this.basketService.findAllBasket();
   }
 
-  @ApiOperation({ summary: 'Get One Basket ' })
+  @ApiOperation({ summary: 'Get One Basket' })
   @ApiResponse({ status: 200, type: Basket })
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Object> {
-    return this.basketService.findOne(+id);
+  findOneBasket(
+    @Param('id') id: number
+  ): Promise<Object> {
+    return this.basketService.findOneBasket(id);
   }
 
   @ApiOperation({ summary: 'Delete One Basket' })
   @ApiResponse({ status: 200, type: Basket })
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<Object | Number> {
-    return this.basketService.remove(+id);
+  removeBasket(
+    @Param('id') id: number
+  ): Promise<Object | Number> {
+    return this.basketService.removeBasket(id);
   }
 }
