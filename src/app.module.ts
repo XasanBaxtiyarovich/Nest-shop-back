@@ -22,6 +22,8 @@ import { ProductModule } from './product/product.module';
 import { CategoryModule } from "./category/category.module";
 import { DiscountModule } from './discount/discount.module';
 import { PromocodeModule } from './promocode/promocode.module';
+import { Basket } from './basket/entities';
+import { BasketModule } from './basket/basket.module';
 
 
 @Module({
@@ -42,7 +44,7 @@ import { PromocodeModule } from './promocode/promocode.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Users, Otp, Admin, Media, Product, Category, Discount, Promocode ],
+      entities: [ Users, Otp, Admin, Media, Product, Category, Discount, Promocode, Basket ],
       synchronize: true,
     }),
     UserModule,
@@ -53,7 +55,8 @@ import { PromocodeModule } from './promocode/promocode.module';
     ProductModule,
     CategoryModule,
     DiscountModule,
-    PromocodeModule
+    PromocodeModule,
+    BasketModule
   ],
   controllers: [],
   providers: [],
