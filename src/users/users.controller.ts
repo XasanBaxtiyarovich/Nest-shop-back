@@ -1,34 +1,28 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Res } from "@nestjs/common";
-import { UsersService } from "./users.service";
-import { CreateUserDto } from "./dto/create-users.dto";
-import { ApiOperation, ApiResponse } from "@nestjs/swagger";
-import { Users } from "./entities/users.entities";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import { LoginDtoUser } from "./dto/login.dto";
 import { Response } from "express";
-import { PhoneUserDto } from "./dto/Otp-create.dto";
+import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Res } from "@nestjs/common";
+
+import { Users } from "./entities";
+import { UsersService } from "./users.service";
 import { Cookiegetter } from "../decorators/cookiegetter";
+import { PhoneUserDto, LoginDtoUser, UpdateUserDto, CreateUserDto } from "./dto";
 
-
-
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
-    constructor(
-        private readonly usersService: UsersService
-    ){}
+    constructor( private readonly usersService: UsersService ){}
 
-    // @UseInterceptors(FileInterceptor('image'))
-    @ApiOperation({summary:"User Registration"})
+    @ApiOperation({summary:"user sign up"})
     @ApiResponse({status:200,type:Users})
     @Post('auth')
     register(
         @Body() createUserDto:CreateUserDto,
-        @Res({passthrough:true}) res:Response
+        @Res({ passthrough: true }) res:Response
     ){
-        return this.usersService.userRegister(createUserDto,res)
+        return this.usersService.userRegister(createUserDto, res)
     }
 
-    @ApiOperation({summary:"User Login"})
+    @ApiOperation({summary:"user sign in"})
     @ApiResponse({status:200,type:Users})
     @Post('login')
     signin(
@@ -38,7 +32,7 @@ export class UsersController {
         return this.usersService.userLogin(phoneUserDto,res)
     }
 
-    @ApiOperation({summary:"User Login"})
+    @ApiOperation({summary:"user sign in otp"})
     @ApiResponse({status:200,type:Users})
     @Post('login/otp')
     loginOtp(
@@ -49,7 +43,7 @@ export class UsersController {
     }
 
 
-    @ApiOperation({summary:"User Logout"})
+    @ApiOperation({summary:"user sign out"})
     @ApiResponse({status:200,type:Users})
     @Post('logout')
     logout(
@@ -59,14 +53,14 @@ export class UsersController {
         return this.usersService.userlogout(refreshToken,res)
     }
 
-    @ApiOperation({summary:"Find all Users"})
+    @ApiOperation({summary:"find users"})
     @ApiResponse({status:200,type:[Users]})
     @Get('findall')
     getallusers(){
         return this.usersService.getallusers()
     }
 
-    @ApiOperation({summary:"Find One User"})
+    @ApiOperation({summary:"find one user"})
     @ApiResponse({status:200,type:Users})
     @Get('findone/:id')
     findOne(
@@ -75,7 +69,7 @@ export class UsersController {
         return this.usersService.getoneuser(+id)
     }
 
-    @ApiOperation({summary:"Find One Update User"})
+    @ApiOperation({summary:"update one user"})
     @ApiResponse({status:200,type:Users})
     @Patch('update/:id')
     updateuser(
@@ -86,7 +80,7 @@ export class UsersController {
     }
 
 
-    @ApiOperation({summary:"Remove User"})
+    @ApiOperation({summary:"remove one user"})
     @ApiResponse({status:200})
     @Delete('delete/:id')
     Deleteuser(

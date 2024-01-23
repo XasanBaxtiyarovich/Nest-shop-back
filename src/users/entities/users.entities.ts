@@ -1,10 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-
 @Entity('users')
 export class Users{
-
     @ApiProperty({example:1 ,description:"Unique ID"})
     @PrimaryGeneratedColumn('increment')
     id:number
@@ -29,11 +27,9 @@ export class Users{
     @Column({default:false})
     is_block:boolean
 
-
     @ApiProperty({example:"sldnjfhlweoifwhoifh" ,description:"User Hashed Token"})
     @Column({type:'text',default:null})
     hashed_refresh_token:string
-
 
     @CreateDateColumn()
     createt_at:Date

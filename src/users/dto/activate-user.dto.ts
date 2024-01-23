@@ -1,4 +1,4 @@
-import {IsNotEmpty, IsNumber, IsString} from "class-validator"
+import {IsNotEmpty, IsString} from "class-validator"
 
 export class ActiveUserDto{
     @IsString()
@@ -8,5 +8,4 @@ export class ActiveUserDto{
     @IsString()
     @IsNotEmpty()
     otp:string;
-
 }

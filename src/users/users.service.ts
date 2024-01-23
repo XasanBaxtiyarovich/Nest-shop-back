@@ -1,62 +1,33 @@
-import { FilesService } from './../files/files.service';
-import { SmsService } from './../sms/sms.service';
-import { LoginDtoUser } from './dto/login.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { CreateUserDto } from './dto/create-users.dto';
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { Users } from "./entities/users.entities";
-import { JwtService } from "@nestjs/jwt";
-import { BadRequestException, ForbiddenException, NotFoundException, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
+import { v4 } from "uuid"
 import * as bcrypt from 'bcrypt'
-import { v4} from "uuid"
-import * as otpGenerator from "otp-generator"
 import { Response } from 'express';
-import { PhoneUserDto } from './dto/Otp-create.dto';
-import { AddMinutesToDate } from '../helpers/addMinutes';
-import { Otp } from '../otp/entites/create-otp.dto';
+import { Repository } from "typeorm";
+import { JwtService } from "@nestjs/jwt";
+import * as otpGenerator from "otp-generator"
+import { SmsService } from './../sms/sms.service';
+import { InjectRepository } from "@nestjs/typeorm";
+import { BadRequestException, ForbiddenException, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+
+import { Users } from "./entities";
+import { Otp } from '../otp/entites';
+import { PhoneUserDto } from './dto';
 import { encode } from '../helpers/crypto';
-import { ActiveUserDto } from './dto/activate-user.dto';
+import { AddMinutesToDate } from '../helpers/addMinutes';
+import { CreateUserDto, LoginDtoUser, UpdateUserDto } from './dto';
+
 
 export class UsersService {
     constructor(
-        @InjectRepository(Users) private userRepository: Repository<Users>,
         @InjectRepository(Otp) private otpRepository: Repository<Otp>,
-        private jwtService: JwtService,
+        @InjectRepository(Users) private userRepository: Repository<Users>,
         private smsService:SmsService,
-        private filesService:FilesService
+        private jwtService: JwtService,
     ) {}
 
-    async getTokens(user:Users){
-        
-        const jwtPayload={
-            id:user.id,
-            is_block:user.is_block,
-        }
-        const [accessToken,refreshToken] = await Promise.all([
-            
-            this.jwtService.signAsync(jwtPayload,{
-                secret:process.env.ACCES_TOKEN_KEY_PERSON,
-                expiresIn:process.env.ACCESS_TOKEN_TIME
-            }),
-            
-            this.jwtService.signAsync(jwtPayload,{
-                secret:process.env.REFRESH_TOKEN_KEY_PERSON,
-                expiresIn:process.env.REFRESH_TOKEN_TIME
-            }),
-        ])
-        
-        return {
-            access_token:accessToken,
-            refresh_token:refreshToken
-        }  
-    }
-
     async userRegister(createUserDto:CreateUserDto,res:Response) {
-        const {phone} = createUserDto
-        console.log(createUserDto);
+        const { phone } = createUserDto
         
-        const [user] =  await this.userRepository.findBy({phone: createUserDto.phone})
+        const [ user ] =  await this.userRepository.findBy({ phone: createUserDto.phone })
         
         if(user){
             throw new BadRequestException("PhoneNumber already exists")
@@ -100,6 +71,7 @@ export class UsersService {
         };
 
     }
+
     async userOtpLogin(loginDtoUser:LoginDtoUser,res:Response) {
         const [findUser] = await this.userRepository.find({where:{phone:loginDtoUser.phoneNumber}})
         if(!findUser){
@@ -164,32 +136,6 @@ export class UsersService {
         }
     }
 
-
-
-    // async useractivate(activeUserDto:ActiveUserDto,res:Response) {
-    //     const [findUserPhoneNumber] = await this.userRepository.find({where:{phone:activeUserDto.phonenumber}})
-    //     if(!findUserPhoneNumber){
-    //         throw new NotFoundException("This Phone Number is not yet registered");
-    //     }
-    //     if(findUserPhoneNumber.is_block === false){
-    //         throw new BadRequestException("User already activated")
-    //     }
-    //     const [findOtpPhoneNumber] = await this.otpRepository.find({where:{check:activeUserDto.phonenumber}})
-    //     if(!findOtpPhoneNumber){
-    //         throw new NotFoundException("Phone number not found")
-    //     }
-    //     if(findOtpPhoneNumber.otp !== activeUserDto.otp){
-    //         throw new BadRequestException("Otp Code Not Match")
-    //     } 
-    //     const [findUser] = await this.userRepository.find({where:{phone:activeUserDto.phonenumber}})
-    //     console.log(findUser);
-        
-    //     return {
-    //         message:"User activated",
-    //         user:findUser
-    //     }
-    // }
-
     async getallusers() {
         const findallUser = await this.userRepository.find()
         if(!findallUser){
@@ -226,6 +172,7 @@ export class UsersService {
         }
 
     }
+
     async deleteuser(id:number){
         const [findoneUser] = await this.userRepository.find({where:{id:id}})
         if(!findoneUser){
@@ -280,5 +227,29 @@ export class UsersService {
         }
         const encoded = await encode(JSON.stringify(details))
         return {status:'Success',Details:encoded,message}
+    }
+
+    async getTokens(user:Users){
+        const jwtPayload={
+            id:user.id,
+            is_block:user.is_block,
+        }
+        const [accessToken,refreshToken] = await Promise.all([
+            
+            this.jwtService.signAsync(jwtPayload,{
+                secret:process.env.ACCES_TOKEN_KEY_PERSON,
+                expiresIn:process.env.ACCESS_TOKEN_TIME
+            }),
+            
+            this.jwtService.signAsync(jwtPayload,{
+                secret:process.env.REFRESH_TOKEN_KEY_PERSON,
+                expiresIn:process.env.REFRESH_TOKEN_TIME
+            }),
+        ])
+        
+        return {
+            access_token:accessToken,
+            refresh_token:refreshToken
+        }  
     }
 }

@@ -1,13 +1,13 @@
 import { Response } from "express";
-import { ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Body, Controller, Delete, Get, Param, Patch, Post, Res } from "@nestjs/common";
 
 import { Admin } from "./entites";
 import { AdminService } from "./admin.service";
-import { Cookiegetter } from "../decorators/cookiegetter";
 import { CreateAdminDto, LoginAdminDto, UpdateAdminDto, NewPasswordDto } from "./dto";
 
 
+@ApiTags('admin')
 @Controller('admin')
 export class AdminController {
     constructor( private readonly adminService: AdminService ){}
