@@ -1,9 +1,10 @@
+import { IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber } from 'class-validator';
+
+import { Users } from '../../users/entities';
 
 export class CreateBasketDto {
   @ApiProperty({ example: '1', description: 'User ID' })
   @IsNotEmpty()
-  @IsNumber()
-  id: number;
+  user_id: Users;
 }
