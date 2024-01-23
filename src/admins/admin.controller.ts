@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { Body, Controller, Delete, Get, Param, Patch, Post, Res } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Res } from "@nestjs/common";
 
 import { Admin } from "./entites";
 import { AdminService } from "./admin.service";
@@ -12,70 +12,67 @@ import { CreateAdminDto, LoginAdminDto, UpdateAdminDto, NewPasswordDto } from ".
 export class AdminController {
     constructor( private readonly adminService: AdminService ){}
 
-
-
-    @ApiOperation({summary:"Admin Registration"})
-    @ApiResponse({status:200,type:Admin})
-    @Post('register')
-    register(
+    @ApiOperation({ summary: "admin sign up" })
+    @ApiResponse({ status: 200, type: Admin })
+    @Post('signup')
+    admin_signup(
         @Body() createAdminDto:CreateAdminDto,
-        @Res({passthrough:true}) res:Response
-    ){
-        return this.adminService.adminRegister(createAdminDto,res)
+    ): Promise<Object> {
+        return this.adminService.admin_signup(createAdminDto)
     }
 
-    @ApiOperation({summary:"Admin Login"})
-    @ApiResponse({status:200,type:Admin})
-    @Post('login')
-    signin(
+    @ApiOperation({ summary: "admin sign in" })
+    @ApiResponse({ status: 200, type: Admin })
+    @Post('signin')
+    admin_signin(
         @Body() loginAdminDto:LoginAdminDto,
         @Res({passthrough:true}) res:Response
-    ){
-        return this.adminService.adminLogin(loginAdminDto,res)
+    ): Promise<Object> {
+        return this.adminService.admin_signin(loginAdminDto,res)
     }
 
-    @ApiOperation({summary:"Find all Admin"})
-    @ApiResponse({status:200,type:[Admin]})
-    @Get('findall')
-    getallAdmin(){
-        return this.adminService.getalladmins()
+    @ApiOperation({ summary: "find admins" })
+    @ApiResponse({ status: 200, type: [ Admin ] })
+    @Get('find')
+    find_admins(): Promise<Object>{
+        return this.adminService.find_admins()
     }
 
-    @ApiOperation({summary:"Find One Admin"})
-    @ApiResponse({status:200,type:Admin})
-    @Get('findone/:id')
-    findOne(
-        @Param('id') id:string
-    ){
-        return this.adminService.getoneadmin(+id)
+    @ApiOperation({ summary: "find one admin" })
+    @ApiResponse({ status: 200, type: Admin })
+    @Get('find/:id')
+    find_one_admin(
+        @Param('id') id: number
+    ): Promise<Object> {
+        return this.adminService.find_one_admin(id)
     }
 
-    @ApiOperation({summary:"Find One Update Admin"})
-    @ApiResponse({status:200,type:Admin})
-    @Patch('update/:id')
-    updateAdmin(
-        @Param('id') id:string,
-        @Body() updateAdminDto:UpdateAdminDto
-    ){
-        return this.adminService.updateAdminDate(+id,updateAdminDto)
+    @ApiOperation({ summary: "update one admin date" })
+    @ApiResponse({ status: 200, type: Admin })
+    @Put('update/:id')
+    update_admin_date(
+        @Param('id') id: number,
+        @Body() updateAdminDto: UpdateAdminDto
+    ): Promise<Object> {
+        return this.adminService.update_admin_date(id, updateAdminDto)
     }
 
-    @ApiOperation({summary:"Admin update Password"})
-    @ApiResponse({status:200,type:Admin})
-    @Post('newpassword/:id')
-    newpassword(
-        @Param('id') id:string,
-        @Body() newPasswordDto:NewPasswordDto
-    ){
-        return this.adminService.updateAdminPassword(+id,newPasswordDto)
+    @ApiOperation({ summary: "update one admin password" })
+    @ApiResponse({ status: 200, type: Admin })
+    @Post('update-pass/:id')
+    update_admin_pass(
+        @Param('id') id: number,
+        @Body() newPasswordDto: NewPasswordDto
+    ): Promise<Object> {
+        return this.adminService.update_admin_pass(id, newPasswordDto)
     }
 
-    @ApiOperation({summary:"Remove Admin"})
-    @ApiResponse({status:200})
-    @Delete('delete/:id')
-    Deleteuser(
-        @Param('id') id:string,
-    ){
-        return this.adminService.deleteAdmin(+id)
+    @ApiOperation({summary:"remove one admin"})
+    @ApiResponse({ status: 200 })
+    @Delete('remove/:id')
+    remove_admin(
+        @Param('id') id: number,
+    ): Promise<Object> {
+        return this.adminService.remove_admin(id)
     }
 }

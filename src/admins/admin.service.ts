@@ -2,8 +2,8 @@ import * as bcrypt from 'bcrypt'
 import { Response } from 'express';
 import { Repository } from "typeorm";
 import { JwtService } from "@nestjs/jwt";
+import { HttpStatus } from '@nestjs/common';
 import { InjectRepository } from "@nestjs/typeorm";
-import { BadRequestException, HttpStatus, NotFoundException, UnauthorizedException } from '@nestjs/common';
 
 import { Admin } from './entites';
 import { CreateAdminDto, LoginAdminDto, UpdateAdminDto, NewPasswordDto } from './dto';
@@ -15,89 +15,93 @@ export class AdminService {
         private jwtService: JwtService
     ){}
 
-    async adminRegister(createAdminDto:CreateAdminDto,res:Response) { 
-        const [admin] =  await this.adminRepository.findBy({username: createAdminDto.username})
-        
+    async admin_signup(createAdminDto:CreateAdminDto): Promise<Object> { 
+        const [ admin ] =  await this.adminRepository.findBy({ username: createAdminDto.username });
         if(admin){
-            throw new BadRequestException("Username already exists")
+            return {
+                status: HttpStatus.CONFLICT,
+                message: "Username already exists"
+            }
         }
-
-
-        const newUser = await this.adminRepository.create({
-            ...createAdminDto,
-            is_block:false
-        })
         
-        const hashed_password = await bcrypt.hash(createAdminDto.password,7)
-        await this.adminRepository.save(
+        const hashed_password = await bcrypt.hash(createAdminDto.password, 7);
+
+        const new_admin = await this.adminRepository.save(
             {
                 ...createAdminDto,
-                hashed_password:hashed_password,
-                hashed_refresh_token:null,
+                hashed_password: hashed_password,
+                hashed_refresh_token: null,
             }
         )
 
-        const updateUserFind = await this.adminRepository.findBy({id: newUser.id})
-        
         return {
             status: HttpStatus.OK,
-            user:updateUserFind
+            admin: new_admin 
         };
     }
 
-    async adminLogin(loginAdminDto:LoginAdminDto,res:Response) {
-        const [findAdmin] = await this.adminRepository.find({where:{username:loginAdminDto.username}})
-        if(!findAdmin){
-            throw new NotFoundException("This Username does not exist")
-        }
-        if(findAdmin.is_block==true){
-            throw new BadRequestException("Admin is Block User")
-        }
-        const is_Match = await bcrypt.compare(loginAdminDto.password,findAdmin.hashed_password)
-
-        if(!is_Match){
-            throw new UnauthorizedException("Username or password incorrect")
+    async admin_signin(loginAdminDto:LoginAdminDto,res:Response): Promise<Object> {
+        const [ admin ] = await this.adminRepository.findBy({ username: loginAdminDto.username });
+        if(!admin) {
+            return {
+                status: HttpStatus.NOT_FOUND,
+                message: 'Admin not found'
+            }
         }
 
+        if(admin.is_block === true) {
+            return {
+                status: HttpStatus.FORBIDDEN,
+                message: 'Admin is blocked'
+            }
+        }
 
-        const tokens = await this.getTokens(findAdmin)
+        const pass = await bcrypt.compare(loginAdminDto.password, admin.hashed_password);
 
-        const hashed_refresh_token = await bcrypt.hash(tokens.refresh_token,7)
+        if(!pass) {
+            return {
+                status: HttpStatus.FORBIDDEN,
+                message: 'Username or password incorrect'
+            }
+        }
 
-        const updateAdmin = await this.adminRepository.update(
-            {id:findAdmin.id},
-            {hashed_refresh_token:hashed_refresh_token},
-        )
-        const findUpdateAdmin = await this.adminRepository.findBy({id:findAdmin.id})
+        const tokens = await this.getTokens(admin)
 
-        res.cookie('refresh_token',tokens.refresh_token,{
+        const hashed_refresh_token = await bcrypt.hash(tokens.refresh_token, 7)
+
+        await this.adminRepository.update({ id: admin.id }, { hashed_refresh_token:hashed_refresh_token })
+        
+        const logined_admin = await this.adminRepository.findBy({ id: admin.id });
+
+        res.cookie('refresh_token', tokens.refresh_token, {
             maxAge:15*24*60*60*1000,
             httpOnly:true
         })
 
         return {
             message:"Admin Logged in Successfully",
-            admin:findUpdateAdmin,
+            admin: logined_admin,
             tokens:tokens
         };
 
     }
 
-    async getalladmins() {
-        const admins = await this.adminRepository.find()
+    async find_admins(): Promise<Object> {
+        const admins = await this.adminRepository.find();
         if(admins.length === 0){
             return {
                 status: HttpStatus.NOT_FOUND,
                 message: 'Admins Not Found'
             }
         }
+
         return {
-            message:"Admins found successfully",
+            status: HttpStatus.OK,
             admins
         }
     }
 
-    async getoneadmin(id:number) {
+    async find_one_admin(id: number): Promise<Object> {
         const [ admin ] = await this.adminRepository.findBy({ id });
         if(!admin){
             return {
@@ -112,7 +116,7 @@ export class AdminService {
         }
     }
 
-    async updateAdminDate(id:number, updateAdminDto:UpdateAdminDto) {
+    async update_admin_date(id:number, updateAdminDto:UpdateAdminDto): Promise<Object> {
         const [findoneAdmin] = await this.adminRepository.findBy({ id });
         if(!findoneAdmin){
             return {
@@ -131,7 +135,7 @@ export class AdminService {
 
     }
 
-    async updateAdminPassword(id:number,newPasswordDto:NewPasswordDto){
+    async update_admin_pass(id:number,newPasswordDto:NewPasswordDto): Promise<Object> {
         const [ admin ] = await this.adminRepository.findBy({ id })
 
         if(!admin) {
@@ -176,9 +180,9 @@ export class AdminService {
 
     }
 
-    async deleteAdmin(id:number){
-        const [findoneAdmin] = await this.adminRepository.find({where:{id:id}})
-        if(!findoneAdmin){
+    async remove_admin(id: number): Promise<Object | HttpStatus> {
+        const [ admin ] = await this.adminRepository.findBy({ id });
+        if(!admin){
             return {
                 status: HttpStatus.NOT_FOUND,
                 message: 'Admin Not Found'
@@ -189,22 +193,11 @@ export class AdminService {
 
         return HttpStatus.OK;
     }
-
-
-
-
-
-
-
-
-
+    
     async getTokens(admin:Admin){ 
-        const jwtPayload={
-            id:admin.id,
-            is_block:admin.is_block,
-        }
+        const jwtPayload = { id: admin.id, is_block: admin.is_block };
+
         const [accessToken,refreshToken] = await Promise.all([
-            
             this.jwtService.signAsync(jwtPayload,{
                 secret:process.env.ADMIN_ACCES_TOKEN_KEY_PERSON,
                 expiresIn:process.env.ADMIN_ACCESS_TOKEN_TIME
