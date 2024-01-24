@@ -1,14 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
+import { Basket } from '../../basket/entities';
+import { Product } from '../../product/entities';
 
 export class CreateBasketItemDto {
   @ApiProperty({ example: '1', description: 'Basket ID' })
   @IsNotEmpty()
-  basket_id: number;
+  basket: Basket;
 
   @ApiProperty({ example: '1', description: 'Product ID' })
   @IsNotEmpty()
-  product_id: number;
+  product: Product;
 
   @ApiProperty({ example: '10', description: 'Quantity of products' })
   @IsNotEmpty()

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { BasketItemsService } from './basket-items.service';
 import { CreateBasketItemDto } from './dto/create-basket-item.dto';
 import { UpdateBasketItemDto } from './dto/update-basket-item.dto';
@@ -29,6 +29,16 @@ export class BasketItemsController {
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Object> {
     return this.basketItemsService.findOne(+id);
+  }
+
+  @ApiOperation({ summary: 'Update One Basket item' })
+  @ApiResponse({ status: 200, type: BasketItem })
+  @Put(':id')
+  update(
+    @Param('id') id: number,
+    @Body() updateBasketItemDto: UpdateBasketItemDto,
+  ): Promise<Object> {
+    return this.basketItemsService.update(id, updateBasketItemDto);
   }
 
   @ApiOperation({ summary: 'Delete one basket item' })

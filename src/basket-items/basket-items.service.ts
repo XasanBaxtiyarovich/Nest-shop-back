@@ -54,6 +54,26 @@ export class BasketItemsService {
     };
   }
 
+  async update(id: number, updateBasketItemDto: UpdateBasketItemDto) {
+    const [basket_item] = await this.basketItemRepository.findBy({ id });
+    if (!basket_item) {
+      return {
+        message: 'Basket Item not found',
+        status: HttpStatus.NOT_FOUND,
+      };
+    }
+
+    const basketitem = await this.basketItemRepository.update(
+      { id },
+      { ...updateBasketItemDto },
+    );
+
+    return {
+      discount: basketitem,
+      status: HttpStatus.OK,
+    };
+  }
+
   async remove(id: number): Promise<Object | String> {
     const basketItem = await this.basketItemRepository.findBy({ id });
 

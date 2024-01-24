@@ -14,7 +14,7 @@ export class BasketItem {
   @OneToOne(() => Basket)
   @JoinColumn()
   basket: Basket;
-
+  
   @ManyToOne(() => Product, (product) => product.basket_items, { lazy: true })
   product: Product;
 
