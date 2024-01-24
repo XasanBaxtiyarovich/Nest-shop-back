@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Category } from "../../category/entities";
+import { BasketItem } from "../../basket-items/entities";
 
 @Entity('product')
 export class Product {
@@ -56,9 +57,11 @@ export class Product {
     @Column({default: true})
     is_active: boolean;   
 
-    // @ApiProperty({ example: 1, description: 'Category Primary key id'})
     @ManyToOne(() => Category, (category) => category.products, { lazy: true })
     category: Category;
+
+    @OneToMany(() => BasketItem, (basket_item) => basket_item.product, { lazy: true })
+    basket_items: BasketItem[];
 
     @CreateDateColumn()
     created_at: Date; // Creation date
