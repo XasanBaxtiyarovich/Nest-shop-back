@@ -9,8 +9,8 @@ export class Basket {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ApiProperty({ example: 1, description: 'Baskets Primary key id' })
-  @ManyToOne(() => Users, (user) => user.baskets)
+  // @ApiProperty({ example: 1, description: 'Baskets Primary key id' })
+  @ManyToOne(() => Users, (user) => user.baskets, { lazy: true })
   user: Users;
 
   @ApiProperty({ example: 'true', description: 'Basket status' })

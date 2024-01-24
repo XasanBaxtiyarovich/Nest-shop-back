@@ -21,6 +21,6 @@ export class Category {
   @Column({ type: 'varchar', length: 255, nullable: false })
   description: string;
 
-  @OneToMany(() => Product, (product) => product.category)
-  products: Product[]
+  @OneToMany(() => Product, (product) => product.category, { lazy: true })
+  products: Product[];
 }

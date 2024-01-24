@@ -56,9 +56,9 @@ export class Product {
     @Column({default: true})
     is_active: boolean;   
 
-    @ApiProperty({ example: 1, description: 'Category Primary key id'})
-    @ManyToOne(() => Category, (category) => category.products)
-    category: Category
+    // @ApiProperty({ example: 1, description: 'Category Primary key id'})
+    @ManyToOne(() => Category, (category) => category.products, { lazy: true })
+    category: Category;
 
     @CreateDateColumn()
     created_at: Date; // Creation date

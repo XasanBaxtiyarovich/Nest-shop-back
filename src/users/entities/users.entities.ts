@@ -37,6 +37,6 @@ export class Users {
   @CreateDateColumn()
   createt_at: Date;
 
-  @OneToMany(() => Basket, (basket) => basket.user)
+  @OneToMany(() => Basket, (basket) => basket.user, { lazy: true })
   baskets: Basket[];
 }
