@@ -38,5 +38,5 @@ export class Users {
   createt_at: Date;
 
   @OneToMany(() => Basket, (basket) => basket.user, { lazy: true })
-  baskets: Basket[];
+  baskets: Basket[]
 }
