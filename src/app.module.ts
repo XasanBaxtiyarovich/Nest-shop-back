@@ -13,6 +13,7 @@ import { Product } from './product/entities';
 import { Category } from "./category/entities";
 import { Discount } from './discount/entities';
 import { Promocode } from './promocode/entities';
+import { BasketItem } from './basket-items/entities';
 import { DiscountProduct } from './discount_product/entities';
 
 import { OtpModule } from './otp/otp.module';
@@ -26,6 +27,7 @@ import { CategoryModule } from "./category/category.module";
 import { DiscountModule } from './discount/discount.module';
 import { PromocodeModule } from './promocode/promocode.module';
 import { DiscountProductModule } from './discount_product/discount_product.module';
+import { BasketItemsModule } from './basket-items/basket-items.module';
 
 
 @Module({
@@ -46,7 +48,7 @@ import { DiscountProductModule } from './discount_product/discount_product.modul
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Users, Otp, Admin, Media, Product, Category, Discount, Promocode, Basket, DiscountProduct ],
+      entities: [ Users, Otp, Admin, Media, Product, Category, Discount, Promocode, Basket, DiscountProduct, BasketItem ],
       synchronize: true,
     }),
     UserModule,
@@ -59,6 +61,7 @@ import { DiscountProductModule } from './discount_product/discount_product.modul
     DiscountModule,
     PromocodeModule,
     BasketModule,
+    BasketItemsModule,
     DiscountProductModule
   ],
   controllers: [],
