@@ -4,6 +4,7 @@ import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } f
 import { Basket } from "../../basket/entities";
 import {Order} from "../../order/entities";
 import {UserAddress} from "../../user_address/entities";
+import { Comment } from "../../comment/entities";
 
 @Entity('users')
 export class Users {
@@ -31,7 +32,10 @@ export class Users {
   @Column({ default: false })
   is_block: boolean;
 
-  @ApiProperty({ example: 'sldnjfhlweoifwhoifh', description: 'User Hashed Token' })
+  @ApiProperty({
+    example: 'sldnjfhlweoifwhoifh',
+    description: 'User Hashed Token',
+  })
   @Column({ type: 'text', default: null })
   hashed_refresh_token: string;
 
@@ -42,8 +46,13 @@ export class Users {
   @OneToMany(() => Basket, (basket) => basket.user, { lazy: true })
   baskets: Basket[];
 
-  @OneToMany(() => UserAddress, (userAddress) => userAddress.user, { lazy: true })
+  @OneToMany(() => UserAddress, (userAddress) => userAddress.user, {
+    lazy: true,
+  })
   userAddresses: UserAddress[];
+
+  @OneToMany(() => Comment, (comment) => comment.user, { lazy: true })
+  comments: Comment[];
 
   @OneToMany(() => Order, (order) => order.user, { lazy: true })
   orders: Order[];

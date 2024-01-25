@@ -11,7 +11,7 @@ import { Users } from './users/entities';
 import { Media } from './media/entities';
 import { Basket } from './basket/entities';
 import { Product } from './product/entities';
-import { Category } from "./category/entities";
+import { Category } from './category/entities';
 import { Discount } from './discount/entities';
 import { Promocode } from './promocode/entities';
 import { BasketItem } from './basket-items/entities';
@@ -19,21 +19,22 @@ import { DiscountProduct } from './discount_product/entities';
 
 import { OtpModule } from './otp/otp.module';
 import { SmsModule } from './sms/sms.module';
-import { UserModule } from "./users/users.module"
+import { UserModule } from './users/users.module';
 import { MediaModule } from './media/media.module';
 import { StoreModule } from './store/store.module';
 import { AdminModule } from './admins/admin.module';
 import { BasketModule } from './basket/basket.module';
 import { ProductModule } from './product/product.module';
-import { CategoryModule } from "./category/category.module";
+import { CategoryModule } from './category/category.module';
 import { DiscountModule } from './discount/discount.module';
 import { PromocodeModule } from './promocode/promocode.module';
 import { DiscountProductModule } from './discount_product/discount_product.module';
 import { BasketItemsModule } from './basket-items/basket-items.module';
-import {OrderModule} from "./order/order.module";
-import {UserAddress} from "./user_address/entities";
-import {Order} from "./order/entities";
-
+import { OrderModule } from './order/order.module';
+import { UserAddress } from './user_address/entities';
+import { Order } from './order/entities';
+import { Comment } from './comment/entities';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -53,7 +54,23 @@ import {Order} from "./order/entities";
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Users, Otp, Admin, Media, Product, Category, Discount, Promocode, Basket, DiscountProduct, BasketItem, Store, Order, UserAddress ],
+      entities: [
+        Users,
+        Otp,
+        Admin,
+        Media,
+        Product,
+        Category,
+        Discount,
+        Promocode,
+        Basket,
+        DiscountProduct,
+        BasketItem,
+        Store,
+        Order,
+        UserAddress,
+        Comment,
+      ],
       synchronize: true,
     }),
     UserModule,
@@ -70,7 +87,8 @@ import {Order} from "./order/entities";
     DiscountProductModule,
     StoreModule,
     OrderModule,
-    UserAddress
+    UserAddress,
+    CommentModule
   ],
   controllers: [],
   providers: [],

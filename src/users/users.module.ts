@@ -12,6 +12,7 @@ import { UsersController } from "./users.controller";
 import { FilesService } from "../files/files.service";
 import {UserAddress} from "../user_address/entities";
 import {Order} from "../order/entities";
+import { Comment } from "../comment/entities";
 
 
 @Module({
@@ -22,7 +23,8 @@ import {Order} from "../order/entities";
                 Otp,
                 Basket,
                 UserAddress,
-                Order
+                Order,
+                Comment
             ]
         ),
         JwtModule.register({}),
