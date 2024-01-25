@@ -2,6 +2,8 @@ import { ApiProperty } from "@nestjs/swagger";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 import { Basket } from "../../basket/entities";
+import {Order} from "../../order/entities";
+import {UserAddress} from "../../user_address/entities";
 
 @Entity('users')
 export class Users {
@@ -38,5 +40,11 @@ export class Users {
   createt_at: Date;
 
   @OneToMany(() => Basket, (basket) => basket.user, { lazy: true })
-  baskets: Basket[]
+  baskets: Basket[];
+
+  @OneToMany(() => UserAddress, (userAddress) => userAddress.user, { lazy: true })
+  userAddresses: UserAddress[];
+
+  @OneToMany(() => Order, (order) => order.user, { lazy: true })
+  orders: Order[];
 }
