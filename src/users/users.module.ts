@@ -10,6 +10,8 @@ import { SmsModule } from "../sms/sms.module";
 import { UsersService } from "./users.service";
 import { UsersController } from "./users.controller";
 import { FilesService } from "../files/files.service";
+import {UserAddress} from "../user_address/entities";
+import {Order} from "../order/entities";
 
 
 @Module({
@@ -18,7 +20,9 @@ import { FilesService } from "../files/files.service";
             [
                 Users,
                 Otp,
-                Basket
+                Basket,
+                UserAddress,
+                Order
             ]
         ),
         JwtModule.register({}),
