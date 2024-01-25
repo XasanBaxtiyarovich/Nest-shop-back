@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 
 import { Otp } from './otp/entites';
+import { Store } from './store/entites';
 import { Admin } from './admins/entites';
 import { Users } from './users/entities';
 import { Media } from './media/entities';
@@ -20,6 +21,7 @@ import { OtpModule } from './otp/otp.module';
 import { SmsModule } from './sms/sms.module';
 import { UserModule } from "./users/users.module"
 import { MediaModule } from './media/media.module';
+import { StoreModule } from './store/store.module';
 import { AdminModule } from './admins/admin.module';
 import { BasketModule } from './basket/basket.module';
 import { ProductModule } from './product/product.module';
@@ -48,7 +50,7 @@ import { BasketItemsModule } from './basket-items/basket-items.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [ Users, Otp, Admin, Media, Product, Category, Discount, Promocode, Basket, DiscountProduct, BasketItem ],
+      entities: [ Users, Otp, Admin, Media, Product, Category, Discount, Promocode, Basket, DiscountProduct, BasketItem, Store ],
       synchronize: true,
     }),
     UserModule,
@@ -62,7 +64,8 @@ import { BasketItemsModule } from './basket-items/basket-items.module';
     PromocodeModule,
     BasketModule,
     BasketItemsModule,
-    DiscountProductModule
+    DiscountProductModule,
+    StoreModule
   ],
   controllers: [],
   providers: [],

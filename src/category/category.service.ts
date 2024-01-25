@@ -66,6 +66,12 @@ export class CategoryService {
     };
   }
 
+  async findOne(id: number): Promise<Category> {
+    const [category] = await this.categoryRepository.findBy({ id });
+
+    return category;
+  }
+
   async updateCategory(id: number, updateCategoryDto: UpdateCategoryDto, image: any): Promise<Object> {
     const category = await this.categoryRepository.findOne({ where: { id } });
 

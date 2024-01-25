@@ -18,15 +18,17 @@ export class MediaService {
 
     const newMedia = await this.mediaRepository.save({ ...createMediaDto, media_link: process.env.API_URL+file });
 
+    const media = await this.mediaRepository.findOne({where: {id: newMedia.id}, relations: {product: true}})
+
     return {
       message: 'Create successfully',
-      media: newMedia,
+      media,
       status: HttpStatus.OK
      };
   }
 
   async findAllMedia(): Promise<Object> {
-    const medias = await this.mediaRepository.find();
+    const medias = await this.mediaRepository.find({ relations: {product: true} });
 
     if(medias.length === 0) {
       return {
@@ -42,7 +44,7 @@ export class MediaService {
   }
 
   async findOneMedia(id: number): Promise<Object> {
-    const media = await this.mediaRepository.findBy({ id });
+    const media = await this.mediaRepository.findOne({ where: { id }, relations: { product: true }});
 
     if(!media) {
       return {

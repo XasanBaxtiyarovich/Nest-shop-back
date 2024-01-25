@@ -57,7 +57,7 @@ export class Product {
     @Column({default: true})
     is_active: boolean;   
 
-    @ManyToOne(() => Category, (category) => category.products, { lazy: true })
+    @ManyToOne(() => Category, (category) => category.products)
     category: Category;
 
     @OneToMany(() => BasketItem, (basket_item) => basket_item.product, { lazy: true })

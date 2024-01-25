@@ -4,40 +4,44 @@ import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common'
 import { Product } from './entities';
 import { ProductService } from './product.service';
 import { CreateProductDto, UpdateProductDto } from './dto';
+import { CategoryService } from '../category/category.service';
+
 
 @ApiTags('product')
 @Controller('product')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    private categoreService: CategoryService 
+  ) {}
 
-  // Add Product
-  @ApiOperation({summary: 'Add product'})
+  @ApiOperation({summary: 'add product'})
   @ApiResponse({status: 201, type: Product})
   @Post()
-  createProduct(
+  async createProduct(
     @Body() createProductDto: CreateProductDto
   ): Promise<Object> {
-    return this.productService.createProduct(createProductDto);
+    const { categoryId } = createProductDto;
+    const category = await this.categoreService.findOne(categoryId);
+
+    return this.productService.createProduct(createProductDto, category);
   }
 
-  // Find all active products
-  @ApiOperation({summary: 'Find all active products'})
+  @ApiOperation({summary: 'find active products'})
   @ApiResponse({status: 201, type: [Product]})
   @Get('active')
   findAllActiveProduct(): Promise<Object> {
     return this.productService.findAllActiveProduct();
   }
 
-  // Find all not active products
-  @ApiOperation({summary: 'Find all not active products'})
+  @ApiOperation({summary: 'find not active products'})
   @ApiResponse({status: 201, type: [Product]})
   @Get('not-active')
   findAllNotActiveProduct(): Promise<Object> {
     return this.productService.findAllNotActiveProduct();
   }
 
-  // Find one active product
-  @ApiOperation({summary: 'Find one active product'})
+  @ApiOperation({summary: 'find one active product'})
   @ApiResponse({status: 200, type: Product})
   @Get('active/:id')
   findOneActiveProduct(
@@ -46,8 +50,7 @@ export class ProductController {
     return this.productService.findOneActiveProduct(id);
   }
 
-  // Find one not active product
-  @ApiOperation({summary: 'Find one not active product'})
+  @ApiOperation({summary: 'find one not active product'})
   @ApiResponse({status: 200, type: Product})
   @Get('not-active/:id')
   findOneNotActiveProduct(
@@ -56,19 +59,20 @@ export class ProductController {
     return this.productService.findOneNotActiveProduct(id);
   }
 
-  // Update one product
-  @ApiOperation({summary: 'Update one product'})
+  @ApiOperation({summary: 'update one product'})
   @ApiResponse({status: 200, type: Product})
   @Put(':id')
-  updateProduct(
+  async updateProduct(
     @Param('id') id: number, 
     @Body() updateProductDto: UpdateProductDto
   ): Promise<Object> {
-    return this.productService.updateProduct(id, updateProductDto);
+    const { categoryId } = updateProductDto;
+    const category = await this.categoreService.findOne(categoryId);
+
+    return this.productService.updateProduct(id, updateProductDto, category);
   }
 
-  // Remove one product
-  @ApiOperation({summary: 'Remove one product'})
+  @ApiOperation({summary: 'remove one product'})
   @ApiResponse({status: 200, type: Product})
   @Delete(':id')
   removeProduct(
@@ -77,8 +81,7 @@ export class ProductController {
     return this.productService.removeProduct(id);
   }
 
-  // Not Active or Active
-  @ApiOperation({summary: 'Update active product'})
+  @ApiOperation({summary: 'update active product'})
   @ApiResponse({status: 200, type: Product})
   @Get('actived-or-notactivated/:id')
   active(
@@ -87,8 +90,7 @@ export class ProductController {
     return this.productService.active(id)
   }
 
-  // Searche One Product By Name
-  @ApiOperation({summary: 'Searche product'})
+  @ApiOperation({summary: 'searche product by name'})
   @ApiResponse({status: 200, type: Product})
   @Get('searche/:name')
   searche_product(

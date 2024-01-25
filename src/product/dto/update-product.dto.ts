@@ -59,8 +59,8 @@ export class UpdateProductDto {
     @IsNotEmpty()
     unit_of_masure: string;
 
-    @ApiProperty({ example: '1', description: 'Product primary key category id'})
+    @ApiProperty({ example: 1, description: 'Category primary key id'})
     @IsNumber()
-    @IsNotEmpty()
-    category: Category
+    @IsNotEmpty()    
+    categoryId: number;
 }

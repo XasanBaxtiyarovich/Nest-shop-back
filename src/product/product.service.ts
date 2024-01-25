@@ -4,15 +4,23 @@ import { CreateProductDto, UpdateProductDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities';
 import { Like, Repository } from 'typeorm';
+import { CategoryService } from '../category/category.service';
+import { Category } from '../category/entities';
 
 @Injectable()
 export class ProductService {
-  constructor(@InjectRepository(Product) private productRepository: Repository<Product>) {}
+  constructor(
+    @InjectRepository(Product) private productRepository: Repository<Product>,
 
-  async createProduct(createProductDto: CreateProductDto): Promise<Object> {
+  ) {}
+
+  async createProduct(createProductDto: CreateProductDto, category: Category): Promise<Object> {
+    const { categoryId, ...createProductDto2} = createProductDto;
+    
     const newProduct = await this.productRepository.save(
       {
-        ...createProductDto
+        ...createProductDto2,
+        category
       }
     );
 
@@ -24,7 +32,7 @@ export class ProductService {
   }
 
   async findAllActiveProduct(): Promise<Object> {
-    const products = await this.productRepository.find({ where: {is_active: true}});
+    const products = await this.productRepository.find({ where: {is_active: true}, relations:{category:true}});
     if (products.length === 0) {
       return {
         message: 'Products not found',
@@ -54,7 +62,11 @@ export class ProductService {
   }
 
   async findOneActiveProduct(id: number): Promise<Object> {
-    const [ product ] = await this.productRepository.findBy({ id, is_active: true });
+    const product = await this.productRepository.findOne({
+        where: { id, is_active: true },
+        relations: ['category']
+    });
+
     if (!product) {
       return {
         message: 'Product not found',
@@ -69,7 +81,7 @@ export class ProductService {
   }
 
   async findOneNotActiveProduct(id: number): Promise<Object> {
-    const [ product ] = await this.productRepository.findBy({ id, is_active: false });
+    const [ product ] = await this.productRepository.findBy({ id, is_active: false }, );
     if (!product) {
       return {
         message: 'Product not found',
@@ -83,7 +95,9 @@ export class ProductService {
     }
   }
 
-  async updateProduct(id: number, updateProductDto: UpdateProductDto): Promise<Object> {
+  async updateProduct(id: number, updateProductDto: UpdateProductDto, category: Category): Promise<Object> {
+    const { categoryId, ...updateProductDto2} = updateProductDto;
+
     const [ product ] = await this.productRepository.findBy({ id, is_active: true });
     if (!product) {
       return {
@@ -92,9 +106,9 @@ export class ProductService {
       };
     }
 
-    await this.productRepository.update({ id }, { ...updateProductDto });
+    await this.productRepository.update({ id }, { ...updateProductDto2, category });
 
-    const updated_product = await this.productRepository.findBy({ id });
+    const updated_product = await this.productRepository.findOne({ where: { id }, relations: {category: true}});
 
     return {
       discount: updated_product,
@@ -146,7 +160,8 @@ export class ProductService {
       where : {
         name : Like(`%${name}%`),
         is_active: true
-      }
+      },
+      relations: { category: true }
     });
 
     if (products.length === 0) {

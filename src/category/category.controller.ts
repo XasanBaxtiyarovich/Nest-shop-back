@@ -11,7 +11,7 @@ import { CreateCategoryDto, UpdateCategoryDto } from './dto';
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @ApiOperation({ summary: 'Add category' })
+  @ApiOperation({ summary: 'add category' })
   @ApiResponse({ status: 201, type: Category })
   @Post()
   @UseInterceptors(FileInterceptor('image'))
@@ -22,23 +22,23 @@ export class CategoryController {
     return this.categoryService.createCategory(createCategoryDto, image);
   }
 
-  @ApiOperation({ summary: 'Get all categories' })
+  @ApiOperation({ summary: 'find categories' })
   @ApiResponse({ status: 200, type: [Category] })
   @Get()
   findAllCategories(): Promise<Object> {
     return this.categoryService.findAllCategories();
   }
 
-  @ApiOperation({ summary: 'Get One Category' })
+  @ApiOperation({ summary: 'find one category' })
   @ApiResponse({ status: 200, type: Category })
   @Get(':id')
   findOneCategory(
-      @Param('id') id: string,
+      @Param('id') id: number,
   ): Promise<Object> {
-    return this.categoryService.findOneCategory(+id);
+    return this.categoryService.findOneCategory(id);
   }
 
-  @ApiOperation({ summary: 'Update One Category' })
+  @ApiOperation({ summary: 'update one category' })
   @ApiResponse({ status: 200, type: Category })
   @Put(':id')
   @UseInterceptors(FileInterceptor('image'))
@@ -50,7 +50,7 @@ export class CategoryController {
     return this.categoryService.updateCategory(id, updateCategoryDto, image);
   }
 
-  @ApiOperation({ summary: 'Remove One Category' })
+  @ApiOperation({ summary: 'remove one category' })
   @ApiResponse({ status: 200, type: Category })
   @Delete(':id')
   removeCategory(

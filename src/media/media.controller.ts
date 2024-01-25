@@ -11,8 +11,7 @@ import { MediaService } from './media.service';
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
-  // Create media
-  @ApiOperation({summary: 'Create media'})
+  @ApiOperation({summary: 'create media'})
   @ApiResponse({status: 201, type: Media})
   @Post('')
   @UseInterceptors(FileInterceptor('image'))
@@ -23,16 +22,14 @@ export class MediaController {
     return this.mediaService.createMedia(createMediaDto, image);
   }
 
-  // Find all media
-  @ApiOperation({summary: 'Find all media'})
+  @ApiOperation({summary: 'find mediaes'})
   @ApiResponse({status: 201, type: [Media]})
   @Get()
   findAll(): Promise<Object>  {
     return this.mediaService.findAllMedia();
   }
 
-  // Find one media
-  @ApiOperation({summary: 'Find one media'})
+  @ApiOperation({summary: 'find one media'})
   @ApiResponse({status: 201, type: Media})
   @Get(':id')
   findOne(
