@@ -16,5 +16,4 @@ export class NewPasswordDto{
     @IsNotEmpty()
     @MinLength(6)
     new_confirm_password:string
-
 }

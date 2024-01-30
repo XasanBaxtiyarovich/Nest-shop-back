@@ -1,21 +1,19 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 import { Basket } from "../../basket/entities";
 import { Product } from "../../product/entities";
 
-@Entity({ name: 'basket-items' })
+@Entity({ name: 'basket_items' })
 export class BasketItem {
   @ApiProperty({ example: '1', description: 'Unical ID' })
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ApiProperty({ example: 1, description: 'Basket Primary key id'})
-  @OneToOne(() => Basket)
-  @JoinColumn()
+  @ManyToOne(() => Basket, (basket) => basket.basket_items )
   basket: Basket;
   
-  @ManyToOne(() => Product, (product) => product.basket_items, { lazy: true })
+  @ManyToOne(() => Product, (product) => product.basket_items )
   product: Product;
 
   @ApiProperty({ example: '10', description: 'Quantity of products' })

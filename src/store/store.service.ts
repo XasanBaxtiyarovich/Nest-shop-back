@@ -1,49 +1,47 @@
-import { Response } from 'express';
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
-import { AddCountDto } from "./dto/add-store.dto";
+import { HttpStatus, Injectable } from '@nestjs/common';
+
+import { Store } from "./entites";
+import { AddCountDto } from "./dto";
 import { Product } from "../product/entities";
-import { Store } from "./entites/store.entities";
-import { HttpStatus } from '@nestjs/common';
+import { ProductService } from "../product/product.service";
 
 
+@Injectable()
 export class StoreService {
     constructor(
         @InjectRepository(Store) private storeRepository: Repository<Store>,
-        @InjectRepository(Product) private productRepository: Repository<Product>
+        private productService: ProductService
     ) {}
 
-    async addCount(addCountDto: AddCountDto) {
-        const [ product ] =  await this.productRepository.findBy({ id: +addCountDto.product });
-
-        if(!product) {
+    async createStore(addCountDto: AddCountDto): Promise<Object> {
+        const product: HttpStatus | Product = await this.productService.update_count(addCountDto.count, +addCountDto.product);
+        
+        if (product === HttpStatus.NOT_FOUND ) {
             return {
-                message:"Product not found",
-                status:HttpStatus.NOT_FOUND
+                status: HttpStatus.NOT_FOUND,
+                message: "Product Not Found"
             }
         }
-        
-        const store = await this.storeRepository.save({...addCountDto})
-        
-        const count = product.total_count + addCountDto.count;
 
-        await this.productRepository.update({ id: +addCountDto.product }, { total_count: count });
+        const store = await this.storeRepository.save({ product: addCountDto.product, count: addCountDto.count })
         
-        const new_store = await this.storeRepository.findOne({ where: {id: store.id }, relations: {product: true} });
+        const new_store = await this.storeRepository.findOne({ 
+            where: { id: store.id },
+            relations: { product: true }
+        });
 
         return {
-            message:"Store added successfully",
+            status: HttpStatus.OK,
             store: new_store,
         }
-
     }
 
-    async findAll() {
-
-        const findallStore = await this.storeRepository.find({relations:['product_id']})
-        console.log(findallStore.length);
+    async findAllStore(): Promise<Object> {
+        const stories = await this.storeRepository.find({ relations: { product: true} });
         
-        if(findallStore.length == 0 || findallStore.length<0) {
+        if(stories.length === 0) {
             return {
                 message:"Store not found",
                 status:HttpStatus.NOT_FOUND
@@ -51,16 +49,18 @@ export class StoreService {
         }
 
         return {
-            message:"Store successfuly Founded",
-            store:findallStore
+            status: HttpStatus.OK,
+            store: stories
         }
-
     }
 
-    async findOne(id:number) {
-        const findOneStore = await this.storeRepository.find({where:{id:id},relations:['product_id']})
+    async findOneStore(id: number): Promise<Object> {
+        const store = await this.storeRepository.findOne({ 
+            where:{ id }, 
+            relations: { product: true } 
+        });
         
-        if(findOneStore.length==0) {
+        if(!store) {
             return {
                 message:"Store not found",
                 status:HttpStatus.NOT_FOUND
@@ -68,34 +68,23 @@ export class StoreService {
         }
 
         return {
-            message:"Store successfuly Founded",
-            store:findOneStore
+            status: HttpStatus.OK,
+            store
         }
     }
 
-    // async updateStore(id:number,updateDto){
-        
-    // }
+    async removeStore(id: number): Promise<Object | HttpStatus> {
+        const [ store ] = await this.storeRepository.findBy({ id });
 
-    async deleteStore(id:number) {
-        const findStore = await this.storeRepository.findBy({id:id})
-
-        if(findStore.length==0) {
+        if(!store) {
             return {
-                message:"Store not found",
-                status:HttpStatus.NOT_FOUND
+                message: "Store not found",
+                status: HttpStatus.NOT_FOUND
             }
         }
 
-        const deleteStore  = await this.storeRepository.delete({id:id})
+        await this.storeRepository.delete({ id });
 
-        return {
-            message:"Store successfuly Deleted",
-            deleteStore:findStore
-        }
-
-
-    }
-
-    
+        return HttpStatus.NOT_FOUND;
+    }    
 }

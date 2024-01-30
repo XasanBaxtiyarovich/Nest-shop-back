@@ -9,12 +9,15 @@ import { Store } from './store/entites';
 import { Admin } from './admins/entites';
 import { Users } from './users/entities';
 import { Media } from './media/entities';
+import { Order } from './order/entities';
 import { Basket } from './basket/entities';
 import { Product } from './product/entities';
+import { Comment } from './comment/entities';
 import { Category } from './category/entities';
 import { Discount } from './discount/entities';
 import { Promocode } from './promocode/entities';
 import { BasketItem } from './basket-items/entities';
+import { UserAddress } from './user_address/entities';
 import { DiscountProduct } from './discount_product/entities';
 
 import { OtpModule } from './otp/otp.module';
@@ -22,19 +25,16 @@ import { SmsModule } from './sms/sms.module';
 import { UserModule } from './users/users.module';
 import { MediaModule } from './media/media.module';
 import { StoreModule } from './store/store.module';
+import { OrderModule } from './order/order.module';
 import { AdminModule } from './admins/admin.module';
 import { BasketModule } from './basket/basket.module';
 import { ProductModule } from './product/product.module';
+import { CommentModule } from './comment/comment.module';
 import { CategoryModule } from './category/category.module';
 import { DiscountModule } from './discount/discount.module';
 import { PromocodeModule } from './promocode/promocode.module';
-import { DiscountProductModule } from './discount_product/discount_product.module';
 import { BasketItemsModule } from './basket-items/basket-items.module';
-import { OrderModule } from './order/order.module';
-import { UserAddress } from './user_address/entities';
-import { Order } from './order/entities';
-import { Comment } from './comment/entities';
-import { CommentModule } from './comment/comment.module';
+import { DiscountProductModule } from './discount_product/discount_product.module';
 
 @Module({
   imports: [

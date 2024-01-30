@@ -1,10 +1,10 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
+import { Order } from "../../order/entities";
 import { Basket } from "../../basket/entities";
-import {Order} from "../../order/entities";
-import {UserAddress} from "../../user_address/entities";
 import { Comment } from "../../comment/entities";
+import { UserAddress } from "../../user_address/entities";
 
 @Entity('users')
 export class Users {
@@ -32,10 +32,11 @@ export class Users {
   @Column({ default: false })
   is_block: boolean;
 
-  @ApiProperty({
-    example: 'sldnjfhlweoifwhoifh',
-    description: 'User Hashed Token',
-  })
+  @ApiProperty({ example: true, description: 'User Registred' })
+  @Column({ default: false })
+  is_registred_succ: boolean;
+
+  @ApiProperty({ example: 'sldnjfhlweoifwhoifh', description: 'User Hashed Token' })
   @Column({ type: 'text', default: null })
   hashed_refresh_token: string;
 
@@ -46,9 +47,7 @@ export class Users {
   @OneToMany(() => Basket, (basket) => basket.user, { lazy: true })
   baskets: Basket[];
 
-  @OneToMany(() => UserAddress, (userAddress) => userAddress.user, {
-    lazy: true,
-  })
+  @OneToMany(() => UserAddress, (userAddress) => userAddress.user, { lazy: true })
   userAddresses: UserAddress[];
 
   @OneToMany(() => Comment, (comment) => comment.user, { lazy: true })

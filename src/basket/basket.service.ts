@@ -4,24 +4,19 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 
 import { Basket } from './entities';
 import { CreateBasketDto } from './dto';
+import { Users } from '../users/entities';
 
 
 @Injectable()
 export class BasketService {
-  constructor( @InjectRepository(Basket) private basketRepository: Repository<Basket> ) {}
+  constructor( 
+    @InjectRepository(Basket) private basketRepository: Repository<Basket>,
+    @InjectRepository(Users) private userRepository: Repository<Users> 
+  ) {}
 
-  async createBasket(createBasketDto: CreateBasketDto): Promise<Object> {
-    const existingBasket = await this.basketRepository.findBy({ user: createBasketDto.user });
-
-    if (existingBasket) {
-      return {
-        message: 'Basket already exists',
-        state: HttpStatus.CONFLICT,
-      };
-    }
-
+  async createBasket(users: Users): Promise<Object> {
     const newBasket = await this.basketRepository.save({
-      ...createBasketDto,
+      user: users,
     });
 
     return {
@@ -32,7 +27,7 @@ export class BasketService {
   }
 
   async findAllBasket(): Promise<Object> {
-    const baskets = await this.basketRepository.find();
+    const baskets = await this.basketRepository.find({ relations: { user: true } });
 
     if (baskets.length == 0) {
       return {
@@ -48,7 +43,7 @@ export class BasketService {
   }
 
   async findOneBasket(id: number): Promise<Object> {
-    const basket = await this.basketRepository.findBy({ id });
+    const basket = await this.basketRepository.findOne({ where: { id }, relations: { user: true }});
 
     if (!basket) {
       return {
@@ -76,5 +71,10 @@ export class BasketService {
     await this.basketRepository.delete({ id });
 
     return HttpStatus.OK;
+  }
+
+
+  findOneUser (id: number): Promise<Users> {
+    return this.userRepository.findOne({ where: { id } });
   }
 }

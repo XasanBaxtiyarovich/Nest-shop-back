@@ -1,42 +1,48 @@
-import { Body, Controller, Delete, Get, Param, Post } from "@nestjs/common";
-import { AddCountDto } from "./dto/add-store.dto";
+import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Controller, Body, Delete, Get, Param, Post } from "@nestjs/common";
+
+import { Store } from "./entites";
+import { AddCountDto } from "./dto";
 import { StoreService } from "./store.service";
-import { ApiTags } from "@nestjs/swagger";
+
 
 @ApiTags('store')
 @Controller('store')
 export class StoreController{
-    constructor(
-        private readonly storeService: StoreService
-    ) {}
+    constructor( private readonly storeService: StoreService ){}
 
-
-    @Post('create')
-    addCount(
-        @Body() addCountDto:AddCountDto
-    ){
-        return  this.storeService.addCount(addCountDto)
+    @ApiOperation({ summary: 'add store' })
+    @ApiResponse({ status: 200, type: Store })
+    @Post()
+    createStore(
+        @Body() addCountDto: AddCountDto
+    ): Promise<Object> {
+        return  this.storeService.createStore(addCountDto)
     }
 
-    @Get('findall')
-    getall(){
-        return this.storeService.findAll()
+    @ApiOperation({ summary: 'find stories' })
+    @ApiResponse({ status: 200, type: [ Store ] })
+    @Get()
+    findAllStore(): Promise<Object> {
+        return this.storeService.findAllStore()
     }
 
-    @Get('find/:id')
-    getOne(
-        @Param('id') id:string
-    ){
-        return this.storeService.findOne(+id)
-    }
-
-
-    @Delete('delete/:id')
-    deleteStore(
-        @Param('id') id:string
-    ){
-        return this.storeService.deleteStore(+id) 
+    @ApiOperation({ summary: 'find one store' })
+    @ApiResponse({ status: 200, type: Store })
+    @Get(':id')
+    findOneStore(
+        @Param('id') id: number
+    ): Promise<Object> {
+        return this.storeService.findOneStore(id)
     }
 
 
+    @ApiOperation({ summary: 'remove one store' })
+    @ApiResponse({ status: 200, type: Store })
+    @Delete(':id')
+    removeStore(
+        @Param('id') id: number
+    ): Promise<Object> {
+        return this.storeService.removeStore(id) 
+    }
 }

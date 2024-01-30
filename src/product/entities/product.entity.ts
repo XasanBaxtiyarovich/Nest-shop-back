@@ -1,8 +1,10 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+
+import { Comment } from "../../comment/entities";
 import { Category } from "../../category/entities";
 import { BasketItem } from "../../basket-items/entities";
-import { Comment } from "../../comment/entities";
+import { Store } from "../../store/entites";
 
 @Entity('product')
 export class Product {
@@ -71,6 +73,9 @@ export class Product {
 
   @ManyToOne(() => Comment, (comment) => comment.product, { lazy: true })
   comment: Comment[];
+
+  @OneToMany(() => Store, (store) => store.product)
+  stories: Store[];
 
   @CreateDateColumn()
   created_at: Date; // Creation date

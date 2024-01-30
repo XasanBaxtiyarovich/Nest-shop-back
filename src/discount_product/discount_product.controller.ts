@@ -1,5 +1,5 @@
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
 
 import { DiscountProduct } from './entities';
 import { DiscountProductService } from './discount_product.service';
@@ -37,7 +37,7 @@ export class DiscountProductController {
 
   @ApiOperation({summary: 'update one discount product'})
   @ApiResponse({status: 201, type: DiscountProduct})
-  @Patch(':id')
+  @Put(':id')
   updateDiscountProduct(
     @Param('id') id: number, 
     @Body() updateDiscountProductDto: UpdateDiscountProductDto

@@ -4,6 +4,8 @@ import { CreateBasketItemDto } from './dto/create-basket-item.dto';
 import { UpdateBasketItemDto } from './dto/update-basket-item.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BasketItem } from './entities';
+import { Product } from '../product/entities';
+import { Basket } from '../basket/entities';
 
 @ApiTags('basket-items')
 @Controller('basket-items')
@@ -13,8 +15,13 @@ export class BasketItemsController {
   @ApiOperation({ summary: 'Add basket-item' })
   @ApiResponse({ status: 201, type: BasketItem })
   @Post()
-  create(@Body() createBasketItemDto: CreateBasketItemDto): Promise<Object> {
-    return this.basketItemsService.create(createBasketItemDto);
+  async create(
+    @Body() createBasketItemDto: CreateBasketItemDto
+  ): Promise<Object> {
+    const product: Product = await this.basketItemsService.findOneProduct(+createBasketItemDto.product);
+    const basket: Basket = await this.basketItemsService.findOneBasket(+createBasketItemDto.basket);
+
+    return this.basketItemsService.create(createBasketItemDto, product, basket);
   }
 
   @ApiOperation({ summary: 'Get all basket items' })

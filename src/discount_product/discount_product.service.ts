@@ -10,7 +10,7 @@ export class DiscountProductService {
   constructor(@InjectRepository(DiscountProduct) private discountProductRepository: Repository<DiscountProduct> ){}
 
   async createDiscountProduct(createDiscountProductDto: CreateDiscountProductDto): Promise<Object> {
-    const discount_product = await this.discountProductRepository.findBy(
+    const [ discount_product ] = await this.discountProductRepository.findBy(
       { 
         product: createDiscountProductDto.product, 
         discount: createDiscountProductDto.discount
@@ -24,7 +24,12 @@ export class DiscountProductService {
       }
     }
 
-    const new_dicount_product = await this.discountProductRepository.save({ ...createDiscountProductDto });
+    const created_dicount_product = await this.discountProductRepository.save({ ...createDiscountProductDto });
+
+    const new_dicount_product = await this.discountProductRepository.findOne({
+        where: { id: created_dicount_product.id },
+        relations: {product: true, discount: true }
+    });
 
     return {
       status: HttpStatus.CREATED,
@@ -33,7 +38,7 @@ export class DiscountProductService {
   }
 
   async findAllDiscountProduct(): Promise<Object> {
-    const discount_products = await this.discountProductRepository.find();
+    const discount_products = await this.discountProductRepository.find({ relations: {product: true, discount: true } });
 
     if (discount_products.length === 0) {
       return {
@@ -49,7 +54,7 @@ export class DiscountProductService {
   }
 
   async findOneDiscountProduct(id: number): Promise<Object> {
-    const discount_product = await this.discountProductRepository.findBy({ id });
+    const discount_product = await this.discountProductRepository.findOne({ where: { id }, relations: {product: true, discount: true } });
 
     if (!discount_product) {
       return {
@@ -76,7 +81,7 @@ export class DiscountProductService {
 
     await this.discountProductRepository.update({ id }, { ...updateDiscountProductDto });
 
-    const updated_discount_product = await this.discountProductRepository.findBy({ id });
+    const updated_discount_product = await this.discountProductRepository.findOne({ where: { id }, relations: { product: true, discount: true }});
 
     return {
       status: HttpStatus.OK,

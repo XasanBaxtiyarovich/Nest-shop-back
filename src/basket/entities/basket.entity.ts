@@ -1,16 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Users } from '../../users/entities';
+import { BasketItem } from '../../basket-items/entities';
 
-@Entity({ name: 'basket' })
+@Entity('basket')
 export class Basket {
   @ApiProperty({ example: '1', description: 'Unical ID' })
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  // @ApiProperty({ example: 1, description: 'Baskets Primary key id' })
-  @ManyToOne(() => Users, (user) => user.baskets, { lazy: true })
+  @ManyToOne(() => Users, (user) => user.baskets)
   user: Users;
 
   @ApiProperty({ example: 'true', description: 'Basket status' })
@@ -20,4 +20,7 @@ export class Basket {
   @ApiProperty({ example: '2024-12-01', description: 'Created date' })
   @CreateDateColumn()
   created_at: string;
+
+  @OneToMany(() => BasketItem, (basket_item) => basket_item.basket)
+  basket_items: BasketItem[];
 }

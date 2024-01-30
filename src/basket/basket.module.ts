@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Basket } from './entities';
 import { Users } from '../users/entities';
 import { BasketService } from './basket.service';
+import { BasketItem } from '../basket-items/entities';
 import { BasketController } from './basket.controller';
 
 
@@ -12,9 +13,10 @@ import { BasketController } from './basket.controller';
     TypeOrmModule.forFeature(
       [
         Basket,
-        Users
+        Users, 
+        BasketItem
       ]
-    )
+    ),
   ],
   controllers: [BasketController],
   providers: [BasketService],

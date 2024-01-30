@@ -10,10 +10,9 @@ import { HttpStatus, ServiceUnavailableException } from '@nestjs/common';
 
 import { Users } from "./entities";
 import { Otp } from '../otp/entites';
-import { PhoneUserDto } from './dto';
 import { encode } from '../helpers/crypto';
 import { AddMinutesToDate } from '../helpers/addMinutes';
-import { CreateUserDto, LoginDtoUser, UpdateUserDto } from './dto';
+import { CreateUserDto, OtpCreateDto, SignInDto, UpdateDateDto } from './dto';
 
 
 export class UsersService {
@@ -24,9 +23,9 @@ export class UsersService {
         private jwtService: JwtService,
     ) {}
 
-    async user_signup(createUserDto:CreateUserDto): Promise<Object> {
+    async user_signup(createUserDto: CreateUserDto): Promise<Object> {
         const { phone } = createUserDto;
-        const [ user ] =  await this.userRepository.findBy({ phone: createUserDto.phone });
+        const [ user ] =  await this.userRepository.findBy({ phone: createUserDto.phone, is_registred_succ: true });
         
         if(user) {
             return {
@@ -35,18 +34,20 @@ export class UsersService {
             }
         }
 
+        await this.userRepository.delete({ phone: createUserDto.phone, is_registred_succ: false });
+
         const new_user  = await this.userRepository.save({ ...createUserDto, hashed_refresh_token: null });
 
         await this.newOTP({ phoneNumber: phone });
         
         return {
-            message:"User signup successfully",
+            message:"OTP sended successfully",
             user: new_user
         };
     }
 
-    async user_signin(loginDtoUser:PhoneUserDto): Promise<Object> {
-        const [ user ] = await this.userRepository.findBy({ phone:loginDtoUser.phoneNumber });
+    async user_signin(signInDto: SignInDto): Promise<Object> {
+        const [ user ] = await this.userRepository.findBy({ phone: signInDto.phoneNumber });
         if(!user) {
             return {
                 status: HttpStatus.NOT_FOUND,
@@ -54,24 +55,24 @@ export class UsersService {
             }
         }
 
-        if(user.is_block === true) {
+        if(user.is_block === true) {signInDto
             return {
                 status: HttpStatus.FORBIDDEN,
                 message: 'User is blocked'
             }
         }
 
-        await this.newOTP({ phoneNumber: loginDtoUser.phoneNumber });
+        await this.newOTP({ phoneNumber: signInDto.phoneNumber });
 
         return {
+            message: "OTP sended successfully",
             status: HttpStatus.OK,
-            message:"You have been sent an login code",
         };
 
     }
 
-    async user_otp_created(loginDtoUser: LoginDtoUser, res: Response): Promise<Object> {
-        const [ user ] = await this.userRepository.findBy({ phone: loginDtoUser.phoneNumber });
+    async user_otp_created(otpCreateDto: OtpCreateDto, res: Response): Promise<Object> {
+        const [ user ] = await this.userRepository.findBy({ phone: otpCreateDto.phoneNumber });
         if(!user) {
             return {
                 status: HttpStatus.NOT_FOUND,
@@ -86,7 +87,7 @@ export class UsersService {
             }
         }
 
-        const [ otp_check ] = await this.otpRepository.findBy({ check:loginDtoUser.phoneNumber });
+        const [ otp_check ] = await this.otpRepository.findBy({ check: otpCreateDto.phoneNumber });
         
         if(otp_check.verified === true) {
             return {
@@ -95,7 +96,7 @@ export class UsersService {
             }
         }
 
-        if(otp_check.otp !== loginDtoUser.otp) {
+        if(otp_check.otp !== otpCreateDto.otp) {
             return {
                 status: HttpStatus.CONFLICT,
                 message: 'OTP Error'
@@ -105,8 +106,8 @@ export class UsersService {
         const tokens = await this.getTokens(user);
         const hashed_refresh_token = await bcrypt.hash(tokens.refresh_token,7)
 
-        await this.otpRepository.update({ check: loginDtoUser.phoneNumber }, { verified: true });
-        await this.userRepository.update({id: user.id }, { hashed_refresh_token: hashed_refresh_token });
+        await this.otpRepository.update({ check: otpCreateDto.phoneNumber }, { verified: true });
+        await this.userRepository.update({id: user.id }, { hashed_refresh_token: hashed_refresh_token, is_registred_succ: true });
 
         const logined_user = await this.userRepository.findBy({ id: user.id });
         
@@ -122,8 +123,23 @@ export class UsersService {
         };
     }
 
-    async find_users(): Promise<Object> {
-        const users = await this.userRepository.find()
+    async find_active_users(): Promise<Object> {
+        const users = await this.userRepository.find({ where: { is_block: false } });
+        if(users.length === 0){
+            return {
+                status: HttpStatus.NOT_FOUND,
+                message: 'Users not found'
+            }
+        }
+
+        return {
+            status: HttpStatus.OK,
+            users
+        }
+    }
+
+    async find_not_active_users(): Promise<Object> {
+        const users = await this.userRepository.find({ where: { is_block: true } });
         if(users.length === 0){
             return {
                 status: HttpStatus.NOT_FOUND,
@@ -152,7 +168,7 @@ export class UsersService {
         }
     }
 
-    async update_user(id: number, updateUserDto: UpdateUserDto): Promise<Object> {
+    async update_user_date(id: number, updateDateDto: UpdateDateDto): Promise<Object> {
         const [ user ] = await this.userRepository.findBy({ id });
         if(!user){
             return {
@@ -161,13 +177,14 @@ export class UsersService {
             }
         }
 
-        const updated_user = await this.userRepository.update({ id }, { ...updateUserDto });
+        await this.userRepository.update({ id }, { ...updateDateDto });
+
+        const updated_user = await this.userRepository.findOne({ where: { id }}); 
 
         return {
             status: HttpStatus.OK,
             updated_user
         }
-
     }
 
     async remove_user(id: number): Promise<Object | HttpStatus> {
@@ -184,8 +201,33 @@ export class UsersService {
         return HttpStatus.OK;
     }
 
-    async newOTP(phoneUserDto: PhoneUserDto){
-        const phone_number = phoneUserDto.phoneNumber
+    async active(id: number): Promise<Object | HttpStatus> {
+        const [ user ] = await this.userRepository.findBy({ id });
+    
+        if (!user) {
+          return {
+            message: 'User Not Found',
+            status: HttpStatus.NOT_FOUND
+          };
+        }
+        
+        if (user.is_block) {
+          await this.userRepository.update({ id }, { is_block: false });
+          return {
+            message: 'User not blocked',
+            status: HttpStatus.OK
+          }
+        } else {
+          await this.userRepository.update({ id }, { is_block: true });
+          return {
+            message: 'User blocked',
+            status: HttpStatus.OK
+          }
+        }
+    }
+
+    async newOTP(signInDto: SignInDto){
+        const phone_number = signInDto.phoneNumber
         const otp = otpGenerator.generate(4,{
             upperCaseAlphabets: false,
             lowerCaseAlphabets: false,

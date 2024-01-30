@@ -1,17 +1,15 @@
+import { Like, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { HttpStatus, Injectable } from '@nestjs/common';
 
-import { CreateProductDto, UpdateProductDto } from './dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities';
-import { Like, Repository } from 'typeorm';
-import { CategoryService } from '../category/category.service';
 import { Category } from '../category/entities';
+import { CreateProductDto, UpdateProductDto } from './dto';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
-
   ) {}
 
   async createProduct(createProductDto: CreateProductDto, category: Category): Promise<Object> {
@@ -175,5 +173,20 @@ export class ProductService {
       status: HttpStatus.OK,
       products
     };
+  }
+
+  async update_count(count: number, id: number): Promise<Product | HttpStatus> {
+    const [ product ] =  await this.productRepository.findBy({ id });
+
+    if(!product) HttpStatus.NOT_FOUND;
+
+    await this.productRepository.update(
+      { id }, 
+      { total_count: product.total_count + count }
+    );
+
+    const updated_product = await this.productRepository.findOne({ where: { id } });
+
+    return updated_product;
   }
 }

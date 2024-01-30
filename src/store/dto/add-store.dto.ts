@@ -11,5 +11,5 @@ export class AddCountDto{
     @ApiProperty({ example: 1, description: 'Added count'})
     @IsNumber()
     @IsNotEmpty()
-    count:number;
+    count: number;
 }

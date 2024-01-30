@@ -16,7 +16,7 @@ export class AdminController {
     @ApiResponse({ status: 200, type: Admin })
     @Post('signup')
     admin_signup(
-        @Body() createAdminDto:CreateAdminDto,
+        @Body() createAdminDto: CreateAdminDto,
     ): Promise<Object> {
         return this.adminService.admin_signup(createAdminDto)
     }
@@ -31,16 +31,24 @@ export class AdminController {
         return this.adminService.admin_signin(loginAdminDto,res)
     }
 
-    @ApiOperation({ summary: "find admins" })
+    @ApiOperation({ summary: "find active admins" })
     @ApiResponse({ status: 200, type: [ Admin ] })
-    @Get('find')
-    find_admins(): Promise<Object>{
-        return this.adminService.find_admins()
+    @Get('find-active')
+    find_active_admins(): Promise<Object>{
+        return this.adminService.find_active_admins()
     }
+
+    @ApiOperation({ summary: "find not active admins" })
+    @ApiResponse({ status: 200, type: [ Admin ] })
+    @Get('find-not-active')
+    find_not_active_admins(): Promise<Object>{
+        return this.adminService.find_not_active_admins()
+    }
+
 
     @ApiOperation({ summary: "find one admin" })
     @ApiResponse({ status: 200, type: Admin })
-    @Get('find/:id')
+    @Get(':id')
     find_one_admin(
         @Param('id') id: number
     ): Promise<Object> {
@@ -59,7 +67,7 @@ export class AdminController {
 
     @ApiOperation({ summary: "update one admin password" })
     @ApiResponse({ status: 200, type: Admin })
-    @Post('update-pass/:id')
+    @Put('update-pass/:id')
     update_admin_pass(
         @Param('id') id: number,
         @Body() newPasswordDto: NewPasswordDto
@@ -74,5 +82,14 @@ export class AdminController {
         @Param('id') id: number,
     ): Promise<Object> {
         return this.adminService.remove_admin(id)
+    }
+
+    @ApiOperation({summary: 'update active admin'})
+    @ApiResponse({status: 200, type: Admin})
+    @Get('actived-or-notactivated/:id')
+    active(
+      @Param('id') id: number
+    ): Promise<Object> {
+      return this.adminService.active(id)
     }
 }

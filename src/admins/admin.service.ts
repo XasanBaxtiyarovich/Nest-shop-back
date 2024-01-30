@@ -15,7 +15,7 @@ export class AdminService {
         private jwtService: JwtService
     ){}
 
-    async admin_signup(createAdminDto:CreateAdminDto): Promise<Object> { 
+    async admin_signup(createAdminDto: CreateAdminDto): Promise<Object> { 
         const [ admin ] =  await this.adminRepository.findBy({ username: createAdminDto.username });
         if(admin){
             return {
@@ -28,7 +28,7 @@ export class AdminService {
 
         const new_admin = await this.adminRepository.save(
             {
-                ...createAdminDto,
+                username: createAdminDto.username,
                 hashed_password: hashed_password,
                 hashed_refresh_token: null,
             }
@@ -40,7 +40,7 @@ export class AdminService {
         };
     }
 
-    async admin_signin(loginAdminDto:LoginAdminDto,res:Response): Promise<Object> {
+    async admin_signin(loginAdminDto: LoginAdminDto, res: Response): Promise<Object> {
         const [ admin ] = await this.adminRepository.findBy({ username: loginAdminDto.username });
         if(!admin) {
             return {
@@ -86,8 +86,23 @@ export class AdminService {
 
     }
 
-    async find_admins(): Promise<Object> {
-        const admins = await this.adminRepository.find();
+    async find_active_admins(): Promise<Object> {
+        const admins = await this.adminRepository.find({ where: { is_block: false }});
+        if(admins.length === 0){
+            return {
+                status: HttpStatus.NOT_FOUND,
+                message: 'Admins Not Found'
+            }
+        }
+
+        return {
+            status: HttpStatus.OK,
+            admins
+        }
+    }
+
+    async find_not_active_admins(): Promise<Object> {
+        const admins = await this.adminRepository.find({ where: { is_block: true }});
         if(admins.length === 0){
             return {
                 status: HttpStatus.NOT_FOUND,
@@ -194,6 +209,31 @@ export class AdminService {
         return HttpStatus.OK;
     }
     
+    async active(id: number): Promise<Object | HttpStatus> {
+        const [ admin ] = await this.adminRepository.findBy({ id });
+    
+        if (!admin) {
+          return {
+            message: 'Admin Not Found',
+            status: HttpStatus.NOT_FOUND
+          };
+        }
+        
+        if (admin.is_block) {
+          await this.adminRepository.update({ id }, { is_block: false });
+          return {
+            message: 'Admin not blocked',
+            status: HttpStatus.OK
+          }
+        } else {
+          await this.adminRepository.update({ id }, { is_block: true });
+          return {
+            message: 'Admin blocked',
+            status: HttpStatus.OK
+          }
+        }
+    }
+
     async getTokens(admin:Admin){ 
         const jwtPayload = { id: admin.id, is_block: admin.is_block };
 

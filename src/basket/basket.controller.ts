@@ -4,19 +4,22 @@ import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { Basket } from './entities';
 import { CreateBasketDto } from './dto';
 import { BasketService } from './basket.service';
+import { Users } from '../users/entities';
 
 @ApiTags('basket')
 @Controller('basket')
 export class BasketController {
   constructor(private readonly basketService: BasketService) {}
 
-  @ApiOperation({ summary: 'Add Basket' })
+  @ApiOperation({ summary: 'add basket' })
   @ApiResponse({ status: 200, type: Basket })
   @Post()
-  createBasket(
+  async createBasket(
     @Body() createDto: CreateBasketDto
   ): Promise<String | Object> {
-    return this.basketService.createBasket(createDto);
+    const user: Users = await this.basketService.findOneUser(+createDto.user);
+    
+    return this.basketService.createBasket(user);
   }
 
   @ApiOperation({ summary: 'Get All Baskets' })
